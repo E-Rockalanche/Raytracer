@@ -1,7 +1,13 @@
-#include "material_handler.hpp"
+
 #include <string>
 #include <map>
 #include <vector>
+#include <fstream>
+#include <iostream>
+#include "material_handler.hpp"
+
+std::map<std::string, int> MaterialHandler::name_map;
+std::vector<Material> MaterialHandler::materials;
 
 void MaterialHandler::initialize() {
 	materials.clear();
@@ -10,51 +16,58 @@ void MaterialHandler::initialize() {
 	materials.push_back(Material(Vec3(0.1, 0.1, 0.1), Vec3(1, 1, 1), Vec3(1, 1, 1), 100));
 }
 
+int MaterialHandler::numMaterials() {
+	return materials.size();
+}
+
 bool MaterialHandler::loadMaterialFile(std::string filename) {
 	bool ok = false;
 	std::ifstream fin(filename.c_str());
 	if (fin.is_open()) {
 		Material ignore;
 		Material* cur_material = &ignore;
-		while(!in.fail()) {
+		while(!fin.fail()) {
 			std::string str;
-			in >> str;
+			fin >> str;
 			if (str.size() > 0) {
 				if (str == "newmtl") {
 					std::string material_name;
+					fin >> material_name;
 					materials.push_back(Material());
 					cur_material = &materials.back();
-					handle_map[material_name] = materials.size()-1;
+					name_map[material_name] = materials.size()-1;
 				} else if (str == "Ka") {
 					// ambient colour
-					in >> cur_material->ambient;
+					fin >> cur_material->ambient;
 				} else if (str == "Kd") {
 					// diffuse colour
-					in >> cur_material->diffuse;
+					fin >> cur_material->diffuse;
 				} else if (str == "Ks") {
 					// specular colour
-					in >> cur_material->specular;
+					fin >> cur_material->specular;
 				} else if (str == "Ns") {
 					// specular exponent
-					in >> cur_material->specular_exponent;
+					fin >> cur_material->specular_exponent;
 				} else if (str == "map_Ka") {
 					// ambient texture filename
-					in >> cur_material->ambient_map_filename;
+					fin >> cur_material->ambient_map_filename;
 				} else if (str == "map_Kd") {
 					// ambient texture filename
-					in >> cur_material->diffuse_map_filename;
+					fin >> cur_material->diffuse_map_filename;
 				} else if (str == "map_Ks") {
 					// ambient texture filename
-					in >> cur_material->specular_map_filename;
+					fin >> cur_material->specular_map_filename;
 				} else if (str == "d") {
-					in >> cur_material->alpha;
+					fin >> cur_material->alpha;
 				} else if (str == "Tf") {
-					in >> cur_material->transmission_filter;
+					fin >> cur_material->transmission_filter;
 				} else if (str == "Ni") {
-					in >> cur_material->refraction_index;
+					fin >> cur_material->refraction_index;
 				} else {
-					//ignore line
-					std::getline(in, str);
+					if (str[0] != '#') {
+						std::cout << "unknown token: " << str << '\n';
+					}
+					std::getline(fin, str);
 				}
 			}
 		}
@@ -75,4 +88,8 @@ int MaterialHandler::getHandle(std::string material_name) {
 	} else {
 		return 0;
 	}
+}
+
+Material& MaterialHandler::getMaterial(int index) {
+	return materials[index];
 }

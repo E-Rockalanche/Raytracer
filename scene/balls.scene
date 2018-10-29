@@ -1,0 +1,6 @@
+material balls.mtl
+model plane 0 -3 0   1 0 0   0 0 -1 mirror
+model sphere 0 0 -20 2 red_ball
+model sphere -3 -1 -15 2 green_ball
+model sphere 2 2 -10 2 blue_ball
+light 0 5 5   1 1 1

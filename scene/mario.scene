@@ -1,0 +1,3 @@
+camera 0 100 0   0 100 -1   0 1 0   90
+light 0 100 0   2 2 2
+polygonmodel 0 0 -400 mario/mario.obj

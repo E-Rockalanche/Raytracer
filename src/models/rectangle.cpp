@@ -1,18 +1,22 @@
-#include "models.hpp"
+
 #include <iostream>
+#include "models.hpp"
+#include "material_handler.hpp"
 
 Rectangle::Rectangle(Vec3 position, Vec3 w, Vec3 h, int material_handle)
 		: Plane(position, w, h, material_handle) {
 	setDimensions(w, h);
 }
 
-Rectangle::setDimensions(Vec3 w, Vec3 h) {
+void Rectangle::setDimensions(Vec3 w, Vec3 h) {
 	this->h = h - Vec3::project(h, w);
 	this->w = w - Vec3::project(w, h);
 }
 
-bool Rectangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 position, Vec3 normal, Vec3 w, Vec3 h, float& t) {
+bool Rectangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
+		Vec3 w, Vec3 h, float& t) {
 	bool intersection = false;
+	Vec3 normal = Vec3::normalize(Vec3::crossProduct(w, h));
 	if (Plane::lineIntersection(origin, direction, position, normal, t)) {
 		Vec3 point = origin + t * direction;
 
@@ -30,13 +34,15 @@ bool Rectangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 position, Vec
 	return intersection;
 }
 
-bool Rectangle::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point, Vec3* normal, float* distance) {
+bool Rectangle::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
+		Vec3* normal, int* material_handle, float* distance) const {
 	bool collided = false;
 	float t;
-	if (Rectangle::lineIntersetion(origin, direction, position, this->normal, w, h, t)) {
+	if (Rectangle::lineIntersection(origin, direction, position, w, h, t)) {
 		assignPointer(collision_point, origin + t * direction);
 		assignPointer(normal, this->normal);
 		assignPointer(distance, t);
+		assignPointer(material_handle, this->material_handle);
 		collided = true;
 	}
 	return collided;
@@ -46,6 +52,7 @@ std::istream& operator>>(std::istream& in, Rectangle& rec) {
 	std::string material_name;
 	Vec3 pos, w, h;
 	in >> pos >> w >> h >> material_name;
-	int handle = MaterialHandler::getHandle(material.name);
-	rec = Rectangle(position, w, h, handle);
+	int handle = MaterialHandler::getHandle(material_name);
+	rec = Rectangle(pos, w, h, handle);
+	return in;
 }

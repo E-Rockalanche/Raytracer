@@ -1,30 +1,34 @@
 #include <cfloat>
 #include "models.hpp"
+#include "material_handler.hpp"
 
 RecPrism::RecPrism(Vec3 position, Vec3 w, Vec3 h, Vec3 d, int material_handle)
 		: Model(position, material_handle) {
-	faces[0] = Rectangle(position, w, h, material);
-	faces[1] = Rectangle(position + w, d, h, material);
-	faces[2] = Rectangle(position + d, h, w, material);
-	faces[3] = Rectangle(position, h, d, material);
-	faces[4] = Rectangle(position + h, w, d, material);
-	faces[5] = Rectangle(position, d, w, material);
+	faces[0] = Rectangle(position + d, w, h, material_handle);
+	faces[1] = Rectangle(position + w, h, d, material_handle);
+	faces[2] = Rectangle(position, h, w, material_handle);
+	faces[3] = Rectangle(position, d, h, material_handle);
+	faces[4] = Rectangle(position + h, d, w, material_handle);
+	faces[5] = Rectangle(position, w, d, material_handle);
 }
 
-bool RecPrism::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point, Vec3* normal, float* distance) {
+bool RecPrism::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
+		Vec3* normal, int* material_handle, float* distance) const {
 	bool collided = false;
 	float min_distance = FLT_MAX;
 
 	for(int i = 0; i < FACES; i++) {
 		Vec3 cur_point;
 		Vec3 cur_normal;
+		int cur_material_handle;
 		float cur_distance = FLT_MAX;
-		bool cur_collided = faces[i].lineCollision(origin, direction, &cur_point, &cur_normal, &cur_distance);
+		bool cur_collided = faces[i].lineCollision(origin, direction, &cur_point, &cur_normal, &cur_material_handle, &cur_distance);
 		if (cur_collided && (cur_distance < min_distance)) {
 			min_distance = cur_distance;
 			assignPointer(collision_point, cur_point);
 			assignPointer(normal, cur_normal);
 			assignPointer(distance, cur_distance);
+			assignPointer(material_handle, cur_material_handle);
 			collided = true;
 		}
 	}
@@ -38,4 +42,5 @@ std::istream& operator>>(std::istream& in, RecPrism& prism) {
 	in >> pos >> w >> h >> d >> material_name;
 	int handle = MaterialHandler::getHandle(material_name);
 	prism = RecPrism(pos, w, h, d, handle);
+	return in;
 }

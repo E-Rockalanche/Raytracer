@@ -10,7 +10,7 @@ public:
 	Material();
 	Material(Vec3 ambient, Vec3 diffuse, Vec3 specular, float specular_exponent);
 
-	friend std::istream& operator>>(std::istream& in, Material& mat);
+	friend std::ostream& operator<<(std::ostream& out, const Material& mat);
 
 	// colours
 	Vec3 ambient;
@@ -19,7 +19,6 @@ public:
 	Vec3 transmission_filter;
 
 	float specular_exponent; // spectral exponent (smoothness) (higher number acts more like mirror)
-	float specular_weight; // combination of light and surface colours
 
 	std::string ambient_map_filename;
 	std::string diffuse_map_filename;

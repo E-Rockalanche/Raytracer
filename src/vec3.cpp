@@ -156,9 +156,7 @@ Vec3 Vec3::normalize(Vec3 v) {
 }
 
 Vec3 Vec3::project(Vec3 v, Vec3 onto) {
-	float dot = Vec3::dotProduct(v, onto);
-	float len = onto.length();
-	return (dot / (len * len)) * onto;
+	return Vec3::dotProduct(v, onto) / Vec3::dotProduct(onto, onto) * onto;
 }
 
 Vec3 Vec3::refract(Vec3 v, Vec3 normal, float index1, float index2) {

@@ -34,7 +34,7 @@ obj/test.o: src/test.cpp inc/models.hpp inc/scene.hpp
 obj/material_handler.o: src/material_handler.cpp inc/material_handler.hpp inc/material.hpp
 	$(MAKE_OBJ)
 
-obj/material.o: src/material.cpp inc/materia.hpp
+obj/material.o: src/material.cpp inc/material.hpp
 	$(MAKE_OBJ)
 
 obj/scene.o: src/scene.cpp inc/scene.hpp inc/models.hpp inc/vec3.hpp

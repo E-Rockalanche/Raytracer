@@ -1,9 +1,11 @@
-#include "models.hpp"
+
 #include <istream>
 #include <iostream>
+#include "models.hpp"
 
 std::istream& operator>>(std::istream& in, Model*& model) {
 	std::string type;
+	model = NULL;
 
 	in >> type;
 
@@ -27,12 +29,6 @@ std::istream& operator>>(std::istream& in, Model*& model) {
 		RecPrism* prism = new RecPrism();
 		in >> *prism;
 		model = prism;
-	} else if (type == "polygongroup") {
-		PolygonGroup* group = new PolygonGroup();
-		in >> *group;
-		model = group;
-	} else {
-		model = NULL;
 	}
 
 	return in;

@@ -1,10 +1,12 @@
 #include "models.hpp"
+#include "material_handler.hpp"
 
-Triangle::Triangle(Vec3 v1, Vec3 v2, Vec3 v3, Material material)
-		: Plane(v1, v2 - v1, v3 - v1, material) {}
+Triangle::Triangle(Vec3 v1, Vec3 v2, Vec3 v3, int material_handle)
+		: Plane(v1, v2 - v1, v3 - v1, material_handle) {}
 
 // static
-bool Triangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 v1, Vec3 v2, Vec3 v3, float* t) {
+bool Triangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 v1, Vec3 v2,
+		Vec3 v3, float& t) {
 	bool intersected = false;
 	Vec3 normal = Vec3::crossProduct(v2 - v1, v3 - v1);
 	if (Plane::lineIntersection(origin, direction, v1, normal, t)) {
@@ -26,13 +28,15 @@ bool Triangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 v1, Vec3 v2, V
 	return intersected;
 }
 
-bool Triangle::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point, Vec3* normal, float* distance) {
+bool Triangle::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
+		Vec3* normal, int* material_handle, float* distance) const {
 	bool collided = false;
 	float t;
 	if (Triangle::lineIntersection(origin, direction, position, w, h, t)) {
 		assignPointer(collision_point, origin + t * direction);
 		assignPointer(normal, this->normal);
 		assignPointer(distance, t);
+		assignPointer(material_handle, this->material_handle);
 		collided = true;
 	}
 	return collided;
@@ -41,7 +45,8 @@ bool Triangle::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
 std::istream& operator>>(std::istream& in, Triangle& tri) {
 	std::string material_name;
 	Vec3 v1, v2, v3;
-	in >> v1, v2, v3 >> material_name;
-	int handle = MaterialHandler::getHandle(material.name);
+	in >> v1 >> v2 >> v3 >> material_name;
+	int handle = MaterialHandler::getHandle(material_name);
 	tri = Triangle(v1, v2, v3, handle);
+	return in;
 }
