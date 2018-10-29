@@ -2,17 +2,17 @@ TARGET := assignment2.exe
 CLEAN := del .\obj\*.o .\obj\models\*.o $(TARGET)
 CXX := g++
 
-CFLAGS_UNIX := -c -Wall -Wextra -std=c++11 -I./inc
+CFLAGS_NIX := -c -Wall -Wextra -std=c++11 -I./inc
 CFLAGS_WIN := -c -Wall -Wextra -std=c++11 -I".\inc" -I"C:\MinGW\freeglut\include"
 
-LFLAGS_UNIX := -lm -lGL -lGLU -lglut
+LFLAGS_NIX := -lm -lGL -lGLU -lglut
 LFLAGS_WIN := -lm -L"C:\MinGW\freeglut\lib" -lfreeglut -lopengl32 -lglu32 -Wl,--subsystem,windows
 
 MODELS_SRC = $(wildcard ./src/models/*.cpp)
 MODELS_OBJ = $(patsubst ./src/models/%.cpp, ./obj/models/%.o, $(MODELS_SRC))
 
-MAKE_OBJ = $(CXX) $(CFLAGS_WIN) $< -o $@
-MAKE_EXE = $(CXX) $(LFLAGS_WIN) $^ -o $@
+MAKE_OBJ = $(CXX) $(CFLAGS_NIX) $< -o $@
+MAKE_EXE = $(CXX) $(LFLAGS_NIX) $^ -o $@
 
 $(TARGET): obj/main.o obj/scene.o obj/vec3.o $(MODELS_OBJ)
 	$(MAKE_EXE)
