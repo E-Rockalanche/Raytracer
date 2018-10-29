@@ -14,10 +14,10 @@ MODELS_OBJ = $(patsubst ./src/models/%.cpp, ./obj/models/%.o, $(MODELS_SRC))
 MAKE_OBJ = $(CXX) $(CFLAGS_WIN) $< -o $@
 MAKE_EXE = $(CXX) $(LFLAGS_WIN) $^ -o $@
 
-$(TARGET): obj/main.o obj/scene.o obj/vec3.o $(MODELS_OBJ)
+$(TARGET): obj/main.o obj/scene.o obj/vec3.o obj/material.o obj/material_handler.o $(MODELS_OBJ)
 	$(MAKE_EXE)
 
-test.exe: obj/test.o obj/scene.o obj/vec3.o $(MODELS_OBJ)
+test.exe: obj/test.o obj/scene.o obj/vec3.o obj/material.o obj/material_handler.o $(MODELS_OBJ)
 	$(CXX) -static -lm $^ -o $@
 
 models: $(MODELS_OBJ)
@@ -29,6 +29,12 @@ obj/main.o: src/main.cpp inc/models.hpp inc/scene.hpp
 	$(MAKE_OBJ)
 
 obj/test.o: src/test.cpp inc/models.hpp inc/scene.hpp
+	$(MAKE_OBJ)
+
+obj/material_handler.o: src/material_handler.cpp inc/material_handler.hpp inc/material.hpp
+	$(MAKE_OBJ)
+
+obj/material.o: src/material.cpp inc/materia.hpp
 	$(MAKE_OBJ)
 
 obj/scene.o: src/scene.cpp inc/scene.hpp inc/models.hpp inc/vec3.hpp

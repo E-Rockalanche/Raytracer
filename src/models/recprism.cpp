@@ -1,8 +1,8 @@
 #include <cfloat>
 #include "models.hpp"
 
-RecPrism::RecPrism(Vec3 position, Vec3 w, Vec3 h, Vec3 d, Material material)
-		: Model(position, material) {
+RecPrism::RecPrism(Vec3 position, Vec3 w, Vec3 h, Vec3 d, int material_handle)
+		: Model(position, material_handle) {
 	faces[0] = Rectangle(position, w, h, material);
 	faces[1] = Rectangle(position + w, d, h, material);
 	faces[2] = Rectangle(position + d, h, w, material);
@@ -30,4 +30,12 @@ bool RecPrism::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
 	}
 
 	return collided;
+}
+
+std::istream& operator>>(std::istream& in, RecPrism& prism) {
+	std::string material_name;
+	Vec3 pos, w, h, d;
+	in >> pos >> w >> h >> d >> material_name;
+	int handle = MaterialHandler::getHandle(material_name);
+	prism = RecPrism(pos, w, h, d, handle);
 }

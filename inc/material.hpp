@@ -1,47 +1,32 @@
 #ifndef MATERIAL_HPP
 #define MATERIAL_HPP
 
+#include <string>
 #include <istream>
-#include <ostream>
 #include "vec3.hpp"
 
-struct Material {
+class Material {
+public:
+	Material();
+	Material(Vec3 ambient, Vec3 diffuse, Vec3 specular, float specular_exponent);
+
+	friend std::istream& operator>>(std::istream& in, Material& mat);
+
 	// colours
 	Vec3 ambient;
 	Vec3 diffuse;
 	Vec3 specular;
-	
-	// weights
-	float ka; // ambient weight
-	float kd; // diffuse weight
-	float ks; // specular weight
-	float smoothness; // specular smoothness (higher number acts more like a mirror)
-	
-	/*
-	float opacity = 1.0;
-	float refraction_index = 1.5;
-	*/
+	Vec3 transmission_filter;
 
-	Material() {
-		ka = 0.1;
-		kd = 1.0;
-		ks = 0.5;
-		smoothness = 10.0;
-	}
-	Material(Vec3 ambient, Vec3 diffuse, Vec3 specular, float ka, float kd, float ks, float smoothness)
-		: ambient(ambient), diffuse(diffuse), specular(specular), ka(ka), kd(kd), ks(ks), smoothness(smoothness) {}
+	float specular_exponent; // spectral exponent (smoothness) (higher number acts more like mirror)
+	float specular_weight; // combination of light and surface colours
 
-	friend std::ostream& operator<<(std::ostream& out, Material mat) {
-		out << mat.ambient << ' ' << mat.diffuse << ' ' << mat.specular << ' '
-			<< mat.ka << ' ' << mat.kd << ' ' << mat.ks << ' ' << mat.smoothness;
-		return out;
-	}
+	std::string ambient_map_filename;
+	std::string diffuse_map_filename;
+	std::string specular_map_filename;
 
-	friend std::istream& operator>>(std::istream& in, Material& mat) {
-		in >> mat.ambient >> mat.diffuse >> mat.specular >> mat.ka >> mat.kd
-			>> mat.ks >> mat.smoothness;
-		return in;
-	}
+	float alpha;
+	float refraction_index;
 };
 
 #endif
