@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <algorithm>
+#include <ctime>
 
 #include "scene.hpp"
 
@@ -42,13 +43,15 @@ void Scene::setCamera(Vec3 position, Vec3 at, Vec3 up, float fov) {
 
 void Scene::render(int width, int height, Pixel* buffer) {
 	std::cout << "rendering\n";
-	const int tell = 100000;
+	
+	std::time_t t1 = time(NULL);
 	
 	for(int y = 0; y < height; y++) {
 		for(int x = 0; x < width; x++) {
-			int index = x + y*width;
-			if ((index % tell == 0) && (index > 0)) {
-				std::cout << 100.0 * index / (width * height) << "%\n";
+			std::time_t t2 = time(NULL);
+			if (t2 >= t1 + 5) {
+				t1 = t2;
+				std::cout << 100.0 * (x + y*width) / (width*height) << "%\n";
 			}
 			
 			float x_angle = ((float)x/(width-1) - 0.5) * fov/2 * M_PI/180;

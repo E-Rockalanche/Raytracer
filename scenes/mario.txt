@@ -1,2 +1,2 @@
 1
-polygongroup   0 0 -500    1 1 1   1 1 1   1 1 1   0.1 1 0.0 10   mario.obj
+polygongroup   0 -200 -500    1 1 1   1 1 1   1 1 1   0.1 1 0.0 10   mario.obj
