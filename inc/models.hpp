@@ -68,6 +68,7 @@ class PolygonGroup : public Model {
 public:
 	PolygonGroup() {}
 	PolygonGroup(Vec3 position, std::vector<Vec3> vertices, std::vector<int> indices, Material material);
+	bool loadFile(const char* filename);
 	virtual bool lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point, Vec3* normal, float* distance);
 
 	std::vector<Vec3> vertices;

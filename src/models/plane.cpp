@@ -2,9 +2,7 @@
 #include <iostream>
 
 Plane::Plane(Vec3 position, Vec3 w, Vec3 h, Material material)
-		: Model(position, material) {
-	this->h = h - Vec3::project(h, w);
-	this->w = w - Vec3::project(w, h);
+		: Model(position, material), w(w), h(h) {
 	normal = Vec3::normalize(Vec3::crossProduct(this->w, this->h));
 	constant = Vec3::dotProduct(position, normal);
 }

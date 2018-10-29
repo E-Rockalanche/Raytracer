@@ -3,8 +3,9 @@
 
 Rectangle::Rectangle(Vec3 position, Vec3 w, Vec3 h, Material material)
 		: Plane(position, w, h, material) {
-			std::cout << "w = " << w << ", h = " << h << ", normal = " << normal << '\n';
-		}
+	this->h = h - Vec3::project(h, w);
+	this->w = w - Vec3::project(w, h);
+}
 
 bool Rectangle::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point, Vec3* normal, float* distance) {
 	bool collided = false;

@@ -13,7 +13,7 @@ Scene::Scene() {
 	camera_up = Vec3(0, 1, 0);
 	camera_right = Vec3(1, 0, 0);
 	fov = 90;
-	far_distance = 100;
+	far_distance = 10000;
 	rec_depth = 0;
 }
 
@@ -25,7 +25,7 @@ void Scene::addLight(Light* light) {
 	lights.push_back(light);
 }
 
-void Scene::setCamera(Vec3 position, Vec3 at, Vec3 up, float fov, float far_distance) {
+void Scene::setCamera(Vec3 position, Vec3 at, Vec3 up, float fov) {
 	camera_position = position;
 
 	camera_at = at - position;
@@ -38,7 +38,6 @@ void Scene::setCamera(Vec3 position, Vec3 at, Vec3 up, float fov, float far_dist
 	camera_up.normalize();
 
 	this->fov = fov;
-	this->far_distance = far_distance;
 }
 
 void Scene::render(int width, int height, Pixel* buffer) {
@@ -106,6 +105,7 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance) {
 			}
 		}
 
+
 		if (model != NULL && (total_distance + min_distance) <= far_distance) {
 			total_distance += min_distance;
 			normal.normalize();
@@ -118,37 +118,39 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance) {
 			for(int l = 0; l < (int)lights.size(); l++) {
 				Light* light = lights[l];
 				
-				Vec3 light_dir = Vec3::normalize(light->position - collision_point);
+				Vec3 light_dir = light->position - collision_point;
+				float light_dist = light_dir.length();
+				light_dir /= light_dist;
 				
 				colour += material.ka * light->colour * material.ambient;
 				
-				if (Vec3::dotProduct(light_dir, normal) > 0) {
-					bool can_see_light = true;
-					
-					for(int m = 0; m < (int)models.size(); m++) {
-						Model* cur_model = models[m];
-					
-						bool collided = cur_model->lineCollision(collision_point + light_dir/1000, light_dir, NULL, NULL, NULL);
-					
-						if (collided) {
-							can_see_light = false;
-							break;
-						}
-					}
+				bool can_see_light = true;
 				
-					if (can_see_light) {
-						Vec3 proj = Vec3::project(light_dir, normal);
-						Vec3 specular_dir = light_dir - 2 * proj;
-						
-						float diffuse_dot = Vec3::dotProduct(light_dir, normal);
-						if (diffuse_dot > 0) {
-							colour += material.kd * diffuse_dot * light->colour * material.diffuse;
-						}
+				for(int m = 0; m < (int)models.size(); m++) {
+					Model* cur_model = models[m];
+				
+					bool collided = cur_model->lineCollision(collision_point + light_dir/1000, light_dir, NULL, NULL, NULL);
+				
+					if (collided) {
+						can_see_light = false;
+						break;
+					}
+				}
+			
+				if (can_see_light) {
+					Vec3 proj = Vec3::project(light_dir, normal);
+					Vec3 specular_dir = light_dir - 2 * proj;
+					
+					float diffuse_dot = Vec3::dotProduct(light_dir, normal);
+					if (diffuse_dot > 0) {
+						colour += material.kd * diffuse_dot * light->colour
+							* material.diffuse;// / (1 + light_dist*0.01);
+					}
 
-						float specular_dot = Vec3::dotProduct(specular_dir, direction);
-						if (specular_dot > 0) {
-							colour += material.ks * std::pow(specular_dot, material.smoothness) * light->colour * material.specular;
-						}
+					float specular_dot = Vec3::dotProduct(specular_dir, direction);
+					if (specular_dot > 0) {
+						colour += material.ks * std::pow(specular_dot, material.smoothness)
+							* light->colour * material.specular;// / (1 + light_dist*0.01);
 					}
 				}
 			}
@@ -183,7 +185,7 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance) {
 			*/
 			
 			// attenuation
-			colour /= (1.0 + min_distance * 0.01);
+			// colour /= (1.0 + min_distance * 0.01);
 		}
 	}
 

@@ -1,5 +1,8 @@
 #include "models.hpp"
 #include <cfloat>
+#include <fstream>
+#include <string>
+#include <iostream>
 
 PolygonGroup::PolygonGroup(Vec3 position, std::vector<Vec3> vertices, std::vector<int> indices, Material material)
 	: Model(position, material), vertices(vertices), indices(indices) {}
@@ -7,6 +10,8 @@ PolygonGroup::PolygonGroup(Vec3 position, std::vector<Vec3> vertices, std::vecto
 bool PolygonGroup::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point, Vec3* normal, float* distance) {
 	bool collided = false;
 	float min_distance = FLT_MAX;
+
+	origin -= position;
 
 	int size = indices.size();
 	size -= size%3;
@@ -39,7 +44,7 @@ bool PolygonGroup::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_po
 				}
 
 				if (inside && t < min_distance) {
-					t = min_distance;
+					min_distance = t;
 					assignPointer(collision_point, point);
 					assignPointer(normal, cur_normal);
 					assignPointer(distance, t);
@@ -50,4 +55,50 @@ bool PolygonGroup::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_po
 	}
 
 	return collided;
+}
+
+bool PolygonGroup::loadFile(const char* filename) {
+	bool ok = true;
+	std::ifstream fin(filename);
+	vertices.clear();
+	indices.clear();
+	if (fin.is_open()) {
+		while(!fin.eof() && !fin.fail()) {
+			std::string str;
+			fin >> str;
+			if (str.size() > 0) {
+				if (str == "v") {
+					Vec3 v;
+					fin >> v;
+					vertices.push_back(v);
+					if (fin.fail()) {
+						ok = false;
+						std::cout << "invalid vertex\n";
+						break;
+					}
+				} else if (str == "f") {
+					for(int i = 0; i < 3; i++) {
+						int index;
+						fin >> index;
+						index--;
+						if (index >= (int)vertices.size()) {
+							ok = false;
+							std::cout << "vertex index out of bounds\n";
+						}
+						indices.push_back(index);
+						fin >> str;
+					}
+					if (fin.fail()) {
+						ok = false;
+						std::cout << "invalid face\n";
+						break;
+					}
+				} else {
+					std::getline(fin, str);
+				}
+			}
+		}
+	}
+	fin.close();
+	return ok;
 }

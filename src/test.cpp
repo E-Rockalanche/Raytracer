@@ -12,13 +12,13 @@ int gradient_length = 9;
 int main(int argc, char** argv) {
 	Scene scene;
 
+	int num_models;
 	if (argc != 2) {
 		std::cout << "requires scene filename\n";
 		return 1;
 	} else {
 		std::ifstream fin(argv[1]);
 		if (fin.is_open()) {
-			int num_models;
 			fin >> num_models;
 			for(int i = 0; i < num_models; i++) {
 				Model* model;
@@ -33,6 +33,8 @@ int main(int argc, char** argv) {
 		}
 		fin.close();
 	}
+
+	std::cout << "models: " << num_models << '\n';
 
 	/*
 
@@ -53,8 +55,10 @@ int main(int argc, char** argv) {
 
 	*/
 
-	Light light1(Vec3(0, 5, 5), Vec3(1, 1, 1));
+	Light light1(Vec3(0, 100, 0), Vec3(1, 1, 1));
 	scene.addLight(&light1);
+
+	scene.setCamera(Vec3(0, 100, 0), Vec3(0, 100, -1), Vec3(0, 1, 0), 90);
 
 	const int width = 48;
 	const int height = 48;
@@ -82,7 +86,7 @@ int main(int argc, char** argv) {
 			float luminocity = (0.299*pixel.red + 0.587*pixel.green + 0.114*pixel.blue)/255.0;
 			int gradient_index = std::min((int)std::round(luminocity*gradient_length), gradient_length-1);
 			std::cout << gradient[gradient_index] << ' ';
-
+			
 		}
 		std::cout << "#\n";
 	}

@@ -11,7 +11,7 @@ class Scene {
 public:
 	Scene();
 	void addModel(Model* model);
-	void setCamera(Vec3 position, Vec3 at, Vec3 up, float fov = 90, float far_distance = 100);
+	void setCamera(Vec3 position, Vec3 at, Vec3 up, float fov = 90);
 	void addLight(Light* light);
 	void render(int width, int height, Pixel* buffer);
 
