@@ -5,6 +5,8 @@
 #include <fstream>
 #include <iostream>
 #include "material_handler.hpp"
+#include "vec3.hpp"
+#include "material.hpp"
 
 std::map<std::string, int> MaterialHandler::name_map;
 std::vector<Material> MaterialHandler::materials;
@@ -13,7 +15,9 @@ void MaterialHandler::initialize() {
 	materials.clear();
 	name_map.clear();
 
-	materials.push_back(Material(Vec3(0.1, 0.1, 0.1), Vec3(1, 1, 1), Vec3(1, 1, 1), 100));
+	Vec3 purple(1, 0, 1);
+
+	materials.push_back(Material(purple, purple, purple, 0));
 }
 
 int MaterialHandler::numMaterials() {
@@ -31,11 +35,12 @@ bool MaterialHandler::loadMaterialFile(std::string filename) {
 			fin >> str;
 			if (str.size() > 0) {
 				if (str == "newmtl") {
-					std::string material_name;
-					fin >> material_name;
+					std::string name;
+					fin >> name;
 					materials.push_back(Material());
 					cur_material = &materials.back();
-					name_map[material_name] = materials.size()-1;
+					cur_material->name = name;
+					name_map[name] = materials.size()-1;
 				} else if (str == "Ka") {
 					// ambient colour
 					fin >> cur_material->ambient;

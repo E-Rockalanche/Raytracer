@@ -5,6 +5,7 @@
 #include <iostream>
 #include "models.hpp"
 #include "material_handler.hpp"
+#include "path.hpp"
 
 bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
 		Vec3* normal, int* material_handle, float* distance) const {
@@ -46,6 +47,13 @@ bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_po
 bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 	std::cout << "loading obj file: " << filename << '\n';
 
+	std::string file, subpath;
+	parsePath(filename, subpath, file);
+	path += subpath;
+	filename = file;
+
+	std::cout << "filename: " << filename << ", path: " << path << '\n';
+
 	bool ok = false;
 
 	vertices.clear();
@@ -70,7 +78,10 @@ bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 				if (str == "mtllib") {
 					std::string material_filename;
 					fin >> material_filename;
-					MaterialHandler::loadMaterialFile(path + material_filename);
+					bool loaded = MaterialHandler::loadMaterialFile(path + material_filename);
+					if (!loaded) {
+						break;
+					}
 				} else if (str == "g") {
 					cur_group->bounds = RecPrism(minimums, Vec3(maximums.x - minimums.x, 0, 0),
 						Vec3(0, maximums.y - minimums.y, 0),

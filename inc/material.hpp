@@ -12,6 +12,8 @@ public:
 
 	friend std::ostream& operator<<(std::ostream& out, const Material& mat);
 
+	std::string name;
+
 	// colours
 	Vec3 ambient;
 	Vec3 diffuse;

@@ -44,7 +44,7 @@ void Scene::setCamera(Vec3 position, Vec3 at, Vec3 up, float fov) {
 }
 
 bool Scene::loadScene(std::string filename, std::string path) {
-	bool ok;
+	bool ok = false;
 	std::ifstream fin((path + filename).c_str());
 	if (fin.is_open()) {
 		while(!fin.fail()) {
@@ -65,7 +65,6 @@ bool Scene::loadScene(std::string filename, std::string path) {
 				} else {
 					std::cout << "could not load polygonmodel\n";
 					delete model;
-					ok = false;
 					break;
 				}
 			} else if (str == "material") {

@@ -12,6 +12,7 @@
 #include "vec3.hpp"
 #include "light.hpp"
 #include "material_handler.hpp"
+#include "path.hpp"
 
 #define SCREEN_WIDTH 512
 #define SCREEN_HEIGHT 512
@@ -45,26 +46,17 @@ void keyboard(unsigned char key, int x, int y)  {
 			break;
 
 		case 'm':
-			for(int i = 1; i < MaterialHandler)
+			for(int i = 1; i < MaterialHandler::numMaterials(); i++) {
+				std::cout << '\n' << MaterialHandler::getMaterial(i);
+			}
+			std::cout << '\n';
+			break;
 	}
 }
 
 void renderScene(void)  {
 	glDrawPixels( SCREEN_WIDTH, SCREEN_HEIGHT,  GL_RGB, GL_UNSIGNED_BYTE, pixel_buffer );
 	glutSwapBuffers();
-}
-
-void parsePath(std::string str, std::string& path, std::string& filename) {
-	path = "";
-	filename = "";
-	for(int i = 0; i < (int)str.size(); i++) {
-		char c = str[i];
-		filename += c;
-		if (c == '/' || c == '\\') {
-			path = path + filename;
-			filename = "";
-		}
-	}
 }
 
 int main(int argc, char* argv[]) {
@@ -84,6 +76,7 @@ int main(int argc, char* argv[]) {
 		} else {
 			std::cout << "models: " << scene.models.size() << '\n';
 			std::cout << "lights: " << scene.lights.size() << '\n';
+			std::cout << "materials: " << MaterialHandler::numMaterials() << '\n';
 		}
 	}
 
