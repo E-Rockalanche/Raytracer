@@ -7,22 +7,22 @@
 #include "material_handler.hpp"
 #include "path.hpp"
 
-bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
-		Vec3* normal, int* material_handle, float* tex_x, float* tex_y, float* distance) const {
+bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, CollisionData* collision_data) const {
+
 	bool collided = false;
 	float min_distance = FLT_MAX;
 
 	origin -= position;
 
 	Vec3 vecs[3];
-	float collision_distance = 0;
 	int face_index = -1;
 	const PolygonGroup* hit_group = NULL;
 
 	for(int g = 0; g < (int)groups.size(); g++) {
+
 		const PolygonGroup& group = groups[g];
 
-		if (group.bounds.lineCollision(origin, direction)) {
+		if (group.bounds.lineCollision(origin, direction, NULL)) {
 			int size = group.vertex_indices.size();
 			size -= size%3;
 			for(int f = 0; f < size-2; f += 3) {
@@ -42,12 +42,11 @@ bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_po
 						vecs[2] = v3;
 						face_index = f;
 						hit_group = &group;
-						collision_distance = t;
-
-						assignPointer(distance, t);
-						assignPointer(material_handle, group.material_handle);
-
-						// assignPointer(normal, Vec3::crossProduct(v2 - v1, v3 - v1));
+						
+						if (collision_data) {
+							collision_data->distance = t;
+							collision_data->material_handle = group.material_handle;
+						}
 					}
 				}
 			}
@@ -55,38 +54,32 @@ bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_po
 	}
 
 
-	if (collided) {
-		Vec3 point = origin + collision_distance * direction;
+	if (collided && collision_data) {
+		collision_data->collision_point = origin + collision_data->distance * direction;
+		collision_data->normal = Vec3(0, 0, 0);
+		collision_data->tex_x = 0;
+		collision_data->tex_y = 0;
 
-		assignPointer(collision_point, point);
+		Vec3 tri_normal = Vec3::crossProduct(vecs[1] - vecs[0], vecs[2] - vecs[0]);
 
-		if (normal != NULL && tex_x != NULL && tex_y != NULL) {
-			*normal = Vec3(0, 0, 0);
-			*tex_x = 0;
-			*tex_y = 0;
+		for(int i = 0; i < 3; i++) {
+			int j = (i+1)%3;
+			int k = (i+2)%3;
+			Vec3 side_dir = Vec3::crossProduct(tri_normal, vecs[k] - vecs[j]);
+			Vec3 total_vec = Vec3::project(vecs[i] - vecs[j], side_dir);
+			Vec3 cur_vec = collision_data->collision_point - vecs[j];
+			float weight = Vec3::dotProduct(cur_vec, total_vec) / Vec3::dotProduct(total_vec, total_vec);
+			
+			int normal_index = hit_group->normal_indices[face_index + i];
+			collision_data->normal += weight * normals[normal_index];
 
-			Vec3 tri_normal = Vec3::crossProduct(vecs[1] - vecs[0], vecs[2] - vecs[0]);
-			for(int i = 0; i < 3; i++) {
-				int j = (i+1)%3;
-				int k = (i+2)%3;
-				Vec3 side_dir = Vec3::crossProduct(tri_normal, vecs[k] - vecs[j]);
-				Vec3 total_vec = Vec3::project(vecs[i] - vecs[j], side_dir);
-				Vec3 cur_vec = point - vecs[j];
-				float weight = Vec3::dotProduct(cur_vec, total_vec) / Vec3::dotProduct(total_vec, total_vec);
-				
-				int normal_index = hit_group->normal_indices[face_index + i];
-				*normal += weight * normals[normal_index];
+			int tex_coord_index = hit_group->tex_coord_indices[face_index + i] * 2;
+			collision_data->tex_x += weight * tex_coords[tex_coord_index];
+			collision_data->tex_y += weight * tex_coords[tex_coord_index + 1];
+		}
 
-				int tex_coord_index = hit_group->tex_coord_indices[face_index + i] * 2;
-				*tex_x += weight * tex_coords[tex_coord_index];
-				*tex_y += weight * tex_coords[tex_coord_index + 1];
-			}
-
-			/*
-			if (Vec3::dotProduct(*normal, tri_normal) < 0) {
-				collided = false;
-			}
-			*/
+		if (Vec3::dotProduct(collision_data->normal, direction) > 0) {
+			collided = false;
 		}
 	}
 

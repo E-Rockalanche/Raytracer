@@ -1,6 +1,13 @@
-usemtl balls.mtl
+usemtl materials.mtl
+usemtl mirror.mtl
+
+light 5 10 0   1 1 1
+light -5 10 0   1 0.1 0.1
+camera 0 1 3   0 1 0   0 1 0   90
+
+model sphere 1 -0.5 -10 2 transparent
+model sphere -2 0 -15 3 opaque_blue
+model sphere 4 2 -20 3 opaque_green
+model sphere 0 20 -100 5 opaque_green
+
 model plane 0 -3 0   1 0 0   0 0 -1 mirror
-model sphere 0 0 -20 2 red_ball
-model sphere -3 -1 -15 2 green_ball
-model sphere 2 2 -10 2 blue_ball
-light 0 5 5   1 1 1

@@ -22,13 +22,15 @@ public:
 	Vec3 camera_right;
 	float fov;
 	float far_distance;
+	float attenuation;
 
 	std::vector<Model*> models;
 	std::vector<Light*> lights;
 	
 private:
 	int rec_depth;
-	Vec3 castRay(Vec3 origin, Vec3 direction, float total_distance = 0.0);
+	Vec3 attenuate(const Vec3& light, float distance);
+	Vec3 castRay(Vec3 origin, Vec3 direction, float total_distance = 0.0, float refraction_index = 1.0);
 };
 
 #endif

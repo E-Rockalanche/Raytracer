@@ -18,23 +18,25 @@ bool Plane::lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
 		Vec3 normal, float& t) {
 	bool intersection = false;
 	float dir_dot = Vec3::dotProduct(direction, normal);
-	if (dir_dot < 0) {
+	if (dir_dot != 0) {
 		t = (Vec3::dotProduct(position - origin, normal)) / dir_dot;
 		intersection = (t > 0);
 	}
 	return intersection;
 }
 
-bool Plane::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
-		Vec3* normal, int* material_handle, float* tex_x, float* tex_y, float* distance) const {
+bool Plane::lineCollision(Vec3 origin, Vec3 direction, CollisionData* collision_data) const {
 	bool collided = false;
 	float t;
-	if (Plane::lineIntersection(origin, direction, position, this->normal, t)) {
+	if (Plane::lineIntersection(origin, direction, position, normal, t)) {
 		collided = true;
-		assignPointer(collision_point, origin + t * direction);
-		assignPointer(normal, this->normal);
-		assignPointer(distance, t);
-		assignPointer(material_handle, this->material_handle);
+		
+		if (collision_data) {
+			collision_data->collision_point = origin + t * direction;
+			collision_data->normal = normal;
+			collision_data->distance = t;
+			collision_data->material_handle = material_handle;
+		}
 	}
 	return collided;
 }

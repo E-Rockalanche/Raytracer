@@ -11,8 +11,9 @@
 struct CollisionData {
 	Vec3 collision_point;
 	Vec3 normal;
-	Vec3 material_handle;
+	int material_handle;
 	float tex_x, tex_y;
+	float distance;
 };
 
 class Model {
@@ -24,8 +25,8 @@ public:
 
 	virtual ~Model() {}
 
-	virtual bool lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point = NULL,
-		Vec3* normal = NULL, int* material_handle = NULL, float* tex_x = NULL, float* tex_y = NULL, float* distance = NULL) const = 0;
+	virtual bool lineCollision(Vec3 origin, Vec3 direction,
+		CollisionData* collision_data) const = 0;
 
 	friend std::istream& operator>>(std::istream& in, Model*& model);
 
@@ -39,8 +40,8 @@ public:
 
 	Sphere(Vec3 position, float radius, int material_handle);
 	
-	virtual bool lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point = NULL,
-		Vec3* normal = NULL, int* material_handle = NULL, float* tex_x = NULL, float* tex_y = NULL, float* distance = NULL) const;
+	virtual bool lineCollision(Vec3 origin, Vec3 direction,
+		CollisionData* collision_data) const;
 
 	static bool lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
 		float radius, float& t);
@@ -58,8 +59,8 @@ public:
 	
 	void init();
 
-	virtual bool lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point = NULL,
-		Vec3* normal = NULL, int* material_handle = NULL, float* tex_x = NULL, float* tex_y = NULL, float* distance = NULL) const;
+	virtual bool lineCollision(Vec3 origin, Vec3 direction,
+		CollisionData* collision_data) const;
 
 	static bool lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
 		Vec3 normal, float& t);
@@ -76,8 +77,8 @@ public:
 
 	Triangle(Vec3 v1, Vec3 v2, Vec3 v3, int material_handle);
 
-	virtual bool lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point = NULL,
-		Vec3* normal = NULL, int* material_handle = NULL, float* tex_x = NULL, float* tex_y = NULL, float* distance = NULL) const;
+	virtual bool lineCollision(Vec3 origin, Vec3 direction,
+		CollisionData* collision_data) const;
 
 	static bool lineIntersection(Vec3 origin, Vec3 direction, Vec3 v1, Vec3 v2,
 		Vec3 v3, float& t);
@@ -93,8 +94,8 @@ public:
 
 	void setDimensions(Vec3 w, Vec3 h);
 
-	virtual bool lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point = NULL,
-		Vec3* normal = NULL, int* material_handle = NULL, float* tex_x = NULL, float* tex_y = NULL, float* distance = NULL) const;
+	virtual bool lineCollision(Vec3 origin, Vec3 direction,
+		CollisionData* collision_data) const;
 
 	static bool lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
 		Vec3 w, Vec3 h, float& t);
@@ -108,8 +109,8 @@ public:
 
 	RecPrism(Vec3 position, Vec3 w, Vec3 h, Vec3 d, int material_handle);
 
-	virtual bool lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point = NULL, 
-		Vec3* normal = NULL, int* material_handle = NULL, float* tex_x = NULL, float* tex_y = NULL, float* distance = NULL) const;
+	virtual bool lineCollision(Vec3 origin, Vec3 direction,
+		CollisionData* collision_data) const;
 
 	friend std::istream& operator>>(std::istream& in, RecPrism& recprism);
 
@@ -121,8 +122,8 @@ class PolygonModel : public Model {
 public:
 	PolygonModel() {}
 
-	virtual bool lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point = NULL,
-		Vec3* normal = NULL, int* material_handle = NULL, float* tex_x = NULL, float* tex_y = NULL, float* distance = NULL) const;
+	virtual bool lineCollision(Vec3 origin, Vec3 direction,
+		CollisionData* collision_data) const;
 
 	bool loadObjectFile(std::string filename, std::string path);
 

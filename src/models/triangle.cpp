@@ -1,3 +1,4 @@
+#include <iostream>
 #include "models.hpp"
 #include "material_handler.hpp"
 
@@ -30,16 +31,18 @@ bool Triangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 v1, Vec3 v2,
 	return intersected;
 }
 
-bool Triangle::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
-		Vec3* normal, int* material_handle, float* tex_x, float* tex_y, float* distance) const {
+bool Triangle::lineCollision(Vec3 origin, Vec3 direction, CollisionData* collision_data) const {
 	bool collided = false;
 	float t;
-	if (Triangle::lineIntersection(origin, direction, position, w, h, t)) {
-		assignPointer(collision_point, origin + t * direction);
-		assignPointer(normal, this->normal);
-		assignPointer(distance, t);
-		assignPointer(material_handle, this->material_handle);
+	if (Triangle::lineIntersection(origin, direction, position, position + w, position + h, t)) {
 		collided = true;
+
+		if (collision_data) {
+			collision_data->collision_point = origin + t * direction;
+			collision_data->normal = normal;
+			collision_data->distance = t;
+			collision_data->material_handle = material_handle;
+		}
 	}
 	return collided;
 }
@@ -48,7 +51,9 @@ std::istream& operator>>(std::istream& in, Triangle& tri) {
 	std::string material_name;
 	Vec3 v1, v2, v3;
 	in >> v1 >> v2 >> v3 >> material_name;
+
 	int handle = MaterialHandler::getHandle(material_name);
 	tri = Triangle(v1, v2, v3, handle);
+
 	return in;
 }

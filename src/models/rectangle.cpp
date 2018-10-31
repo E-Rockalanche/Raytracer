@@ -36,16 +36,18 @@ bool Rectangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
 	return intersection;
 }
 
-bool Rectangle::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
-		Vec3* normal, int* material_handle, float* tex_x, float* tex_y, float* distance) const {
+bool Rectangle::lineCollision(Vec3 origin, Vec3 direction, CollisionData* collision_data) const {
 	bool collided = false;
 	float t;
 	if (Rectangle::lineIntersection(origin, direction, position, w, h, t)) {
-		assignPointer(collision_point, origin + t * direction);
-		assignPointer(normal, this->normal);
-		assignPointer(distance, t);
-		assignPointer(material_handle, this->material_handle);
 		collided = true;
+
+		if (collision_data) {
+			collision_data->collision_point = origin + t * direction;
+			collision_data->normal = normal;
+			collision_data->distance = t;
+			collision_data->material_handle = material_handle;
+		}
 	}
 	return collided;
 }
