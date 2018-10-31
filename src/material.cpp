@@ -2,11 +2,24 @@
 #include <istream>
 #include "material.hpp"
 
-Material::Material() : specular_exponent(1.0), alpha(1.0), refraction_index(1.0) {}
+Material::Material() {
+	specular_exponent = 1.0;
+	alpha = 1.0;
+	refraction_index = 1.5;
+	ambient_tex_handle = -1;
+	diffuse_tex_handle = -1;
+	specular_tex_handle = -1;
+}
 
 Material::Material(Vec3 ambient, Vec3 diffuse, Vec3 specular, float specular_exponent)
-	: ambient(ambient), diffuse(diffuse), specular(specular),
-	specular_exponent(specular_exponent), alpha(1.0), refraction_index(1.0) {}
+		: ambient(ambient), diffuse(diffuse), specular(specular),
+		specular_exponent(specular_exponent) {
+	alpha = 1.0;
+	refraction_index = 1.5;
+	ambient_tex_handle = -1;
+	diffuse_tex_handle = -1;
+	specular_tex_handle = -1;
+}
 
 std::ostream& operator<<(std::ostream& out, const Material& mat) {
 	out << "Ka "<< mat.ambient << '\n';

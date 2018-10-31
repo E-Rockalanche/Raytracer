@@ -1,4 +1,4 @@
-material balls.mtl
+usemtl balls.mtl
 model plane 0 -3 0   1 0 0   0 0 -1 mirror
 model sphere 0 0 -20 2 red_ball
 model sphere -3 -1 -15 2 green_ball

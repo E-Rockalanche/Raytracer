@@ -9,7 +9,7 @@
 class MaterialHandler {
 public:
 	static void initialize();
-	static bool loadMaterialFile(std::string filename);
+	static bool loadMaterialFile(std::string filename, std::string path);
 	static int getHandle(std::string material_name);
 	static Material& getMaterial(int index);
 	static int numMaterials();

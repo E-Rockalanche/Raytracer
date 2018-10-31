@@ -26,6 +26,10 @@ public:
 	std::string diffuse_map_filename;
 	std::string specular_map_filename;
 
+	int ambient_tex_handle;
+	int diffuse_tex_handle;
+	int specular_tex_handle;
+
 	float alpha;
 	float refraction_index;
 };

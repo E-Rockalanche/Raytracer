@@ -26,7 +26,7 @@ bool Plane::lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
 }
 
 bool Plane::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
-		Vec3* normal, int* material_handle, float* distance) const {
+		Vec3* normal, int* material_handle, float* tex_x, float* tex_y, float* distance) const {
 	bool collided = false;
 	float t;
 	if (Plane::lineIntersection(origin, direction, position, this->normal, t)) {

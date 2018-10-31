@@ -13,7 +13,7 @@ RecPrism::RecPrism(Vec3 position, Vec3 w, Vec3 h, Vec3 d, int material_handle)
 }
 
 bool RecPrism::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
-		Vec3* normal, int* material_handle, float* distance) const {
+		Vec3* normal, int* material_handle, float* tex_x, float* tex_y, float* distance) const {
 	bool collided = false;
 	float min_distance = FLT_MAX;
 
@@ -22,7 +22,7 @@ bool RecPrism::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
 		Vec3 cur_normal;
 		int cur_material_handle;
 		float cur_distance = FLT_MAX;
-		bool cur_collided = faces[i].lineCollision(origin, direction, &cur_point, &cur_normal, &cur_material_handle, &cur_distance);
+		bool cur_collided = faces[i].lineCollision(origin, direction, &cur_point, &cur_normal, &cur_material_handle, NULL, NULL, &cur_distance);
 		if (cur_collided && (cur_distance < min_distance)) {
 			min_distance = cur_distance;
 			assignPointer(collision_point, cur_point);

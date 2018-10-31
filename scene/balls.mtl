@@ -2,7 +2,7 @@ newmtl red_ball
 Ka 0.1 0 0
 Kd 1 0.1 0.1
 Ks 0.8 0.6 0.6
-Ns 10
+Ns 100
 
 newmtl green_ball
 Ka 0 0.1 0
@@ -14,7 +14,7 @@ newmtl blue_ball
 Ka 0 0 0.1
 Kd 0.1 0.1 1
 Ks 0.6 0.6 0.8
-Ns 10
+Ns 100
 
 newmtl white_ball
 Ka 0.1 0.1 0.1

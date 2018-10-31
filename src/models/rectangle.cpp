@@ -17,25 +17,27 @@ bool Rectangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
 		Vec3 w, Vec3 h, float& t) {
 	bool intersection = false;
 	Vec3 normal = Vec3::normalize(Vec3::crossProduct(w, h));
-	if (Plane::lineIntersection(origin, direction, position, normal, t)) {
-		Vec3 point = origin + t * direction;
+	if (Vec3::dotProduct(direction, normal) < 0) {
+		if (Plane::lineIntersection(origin, direction, position, normal, t)) {
+			Vec3 point = origin + t * direction;
 
-		// check within width and height
-		float w_len = w.length();
-		float wt = Vec3::dotProduct(point - position, w) / (w_len * w_len);
+			// check within width and height
+			float w_len = w.length();
+			float wt = Vec3::dotProduct(point - position, w) / (w_len * w_len);
 
-		if (wt >= 0 && wt <= 1) {
-			float h_len = h.length();
-			float ht = Vec3::dotProduct(point - position, h) / (h_len * h_len);
+			if (wt > -0.00001 && wt < 1.00001) {
+				float h_len = h.length();
+				float ht = Vec3::dotProduct(point - position, h) / (h_len * h_len);
 
-			intersection = (ht >= 0 && ht <= 1);
+				intersection = (ht > -0.00001 && ht < 1.00001);
+			}
 		}
 	}
 	return intersection;
 }
 
 bool Rectangle::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
-		Vec3* normal, int* material_handle, float* distance) const {
+		Vec3* normal, int* material_handle, float* tex_x, float* tex_y, float* distance) const {
 	bool collided = false;
 	float t;
 	if (Rectangle::lineIntersection(origin, direction, position, w, h, t)) {

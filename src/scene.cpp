@@ -7,6 +7,8 @@
 
 #include "scene.hpp"
 #include "material_handler.hpp"
+#include "texture.hpp"
+#include "texture_handler.hpp"
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -67,10 +69,10 @@ bool Scene::loadScene(std::string filename, std::string path) {
 					delete model;
 					break;
 				}
-			} else if (str == "material") {
+			} else if (str == "usemtl") {
 				std::string mat_filename;
 				fin >> mat_filename;
-				bool loaded_mat = MaterialHandler::loadMaterialFile(path + mat_filename);
+				bool loaded_mat = MaterialHandler::loadMaterialFile(mat_filename, path);
 				if (!loaded_mat) {
 					ok = false;
 					break;
@@ -153,6 +155,7 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance) {
 		float min_distance = FLT_MAX;
 		Vec3 collision_point;
 		Vec3 normal;
+		float tex_x, tex_y;
 		Model* model = NULL;
 
 		int material_handle;
@@ -164,27 +167,40 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance) {
 			Vec3 cur_collision_point;
 			float cur_distance = FLT_MAX;
 			Vec3 cur_normal;
+			float cur_tex_x, cur_tex_y;
 			Model* cur_model = models[i];
 			int cur_material_handle;
 
 			bool collided = cur_model->lineCollision(origin, direction,
-				&cur_collision_point, &cur_normal, &cur_material_handle, &cur_distance);
+				&cur_collision_point, &cur_normal, &cur_material_handle, &cur_tex_x, &cur_tex_y, &cur_distance);
 
-			if (collided && (cur_distance < min_distance)) {
+			if (collided && (cur_distance < min_distance) && (Vec3::dotProduct(cur_normal, direction) < 0)) {
 				min_distance = cur_distance;
 				collision_point = cur_collision_point;
 				normal = cur_normal;
 				model = cur_model;
 				material_handle = cur_material_handle;
+				tex_x = cur_tex_x;
+				tex_y = cur_tex_y;
 			}
 		}
 
 
 		if (model != NULL && (total_distance + min_distance) <= far_distance) {
+
 			total_distance += min_distance;
-			normal.normalize();
+			
+			if (Vec3::dotProduct(normal, direction) > 0) {
+				normal *= -1;
+			}
 
 			const Material& material = MaterialHandler::getMaterial(material_handle);
+			Vec3 tex_colour;
+			bool use_texture = material.diffuse_tex_handle != -1;
+			if (use_texture) {
+				const Texture& tex = TextureHandler::getTexture(material.diffuse_tex_handle);
+				tex_colour = tex.sampleColour(tex_x, tex_y, Texture::NEAREST);
+			}
 			
 			/*
 			add illumination from lights
@@ -193,20 +209,20 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance) {
 				Light* light = lights[l];
 				
 				Vec3 light_dir = light->position - collision_point;
-				float light_dist = light_dir.length();
-				light_dir /= light_dist;
-				
-				colour += light->colour * material.ambient;
+				float light_distance = light_dir.length();
+				light_dir /= light_distance;
+
+				colour += light->colour * (use_texture ? (tex_colour/10) : material.ambient);
 				
 				bool can_see_light = true;
 				
 				for(int m = 0; m < (int)models.size(); m++) {
 					Model* cur_model = models[m];
-				
+					float object_distance;
 					bool collided = cur_model->lineCollision(collision_point
-						+ light_dir/1000, light_dir);
+						+ light_dir/1000, light_dir, NULL, NULL, NULL, NULL, NULL, &object_distance);
 				
-					if (collided) {
+					if (collided && object_distance < light_distance) {
 						can_see_light = false;
 						break;
 					}
@@ -216,17 +232,17 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance) {
 					Vec3 proj = Vec3::project(light_dir, normal);
 					Vec3 specular_dir = light_dir - 2 * proj;
 
-					Vec3 attenuated_light = attenuate(light->colour, light_dist);
+					Vec3 attenuated_light = attenuate(light->colour, light_distance);
 					
 					float diffuse_dot = Vec3::dotProduct(light_dir, normal);
 					if (diffuse_dot > 0) {
-						colour += diffuse_dot * attenuated_light * material.diffuse;// / (1 + light_dist*0.01);
+						colour += diffuse_dot * attenuated_light * (use_texture ? tex_colour : material.diffuse);
 					}
 
 					float specular_dot = Vec3::dotProduct(specular_dir, direction);
 					if (specular_dot > 0) {
 						colour += std::pow(specular_dot, material.specular_exponent)
-							* attenuated_light * material.specular;// / (1 + light_dist*0.01);
+							* attenuated_light * material.specular;
 					}
 				}
 			}
@@ -242,9 +258,12 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance) {
 				reflection, total_distance);
 			
 			colour += reflect_colour * material.specular;
+			/*
+			// do we really need diffuse reflected light?
 			colour += Vec3::dotProduct(reflection, normal)
 				* reflect_colour
 				* material.diffuse;
+			*/
 
 			/*
 			add illumination from light on other side of model

@@ -1,0 +1,6 @@
+usemtl balls.mtl
+camera 0 0 0 0 0 -1 0 1 0 90
+model recprism 2 2 -10   -2 -2 -2   0 2 -2   2 -2 -2 red_ball
+model plane 0 -1 0   1 0 0   0 0 -1 blue_ball
+light 0 5 5   1 1 1
+model sphere -3 2 -10 2 green_ball
