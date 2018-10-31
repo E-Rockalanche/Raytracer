@@ -96,7 +96,7 @@ bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_po
 bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 	parsePath(path + filename, path, filename);
 
-	std::cout << "loading model " << filename << '\n';
+	std::cout << "loading obj file: " << filename << '\n';
 
 	bool ok = false;
 
