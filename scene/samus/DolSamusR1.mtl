@@ -1,0 +1,44 @@
+newmtl mat1
+	Ns 100
+	Ni 1.0
+	d 1.0
+	Tf 1 1 1
+	illum 2
+	Ka 0.1 0.1 0.1
+	Kd 0.9 0.9 0.9
+	Ks 1 1 1
+	map_Kd SamusTexB.png
+
+newmtl mat2
+	Ns 100
+	Ni 1.0
+	d 1.0
+	Tf 1 1 1
+	illum 2
+	Ka 0.1 0.1 0.1
+	Kd 0.9 0.9 0.9
+	Ks 1 1 1
+	map_Kd SamusTexC.png
+
+newmtl mat3
+	Ns 100
+	Ni 1.0
+	d 1.0
+	Tf 1 1 1
+	illum 2
+	Ka 0.1 0.1 0.1
+	Kd 0.9 0.9 0.9
+	Ks 1 1 1
+	map_Kd SamusTexA.png
+
+newmtl mat4
+	Ns 100
+	Ni 1.0
+	d 1.0
+	Tf 1 1 1
+	illum 2
+	Ka 0.1 0.1 0.1
+	Kd 0.9 0.9 0.9
+	Ks 1 1 1
+	map_Kd SamusTexB.png
+

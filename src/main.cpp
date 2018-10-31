@@ -11,6 +11,8 @@
 #include "scene.hpp"
 #include "vec3.hpp"
 #include "light.hpp"
+#include "material_handler.hpp"
+#include "path.hpp"
 
 #define SCREEN_WIDTH 512
 #define SCREEN_HEIGHT 512
@@ -19,12 +21,6 @@ Pixel pixel_buffer[SCREEN_WIDTH * SCREEN_HEIGHT];
 
 Scene scene;
 
-Light white_light(Vec3(0, 10, -5), Vec3(1, 1, 1));
-
-void initializeScene() {
-	scene.addLight(&white_light);
-}
-
 void renderImage() {
 	scene.render(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_buffer);
 }
@@ -32,8 +28,8 @@ void renderImage() {
 void clearImage() {
 	try {
 		for( int x = 0; x < SCREEN_WIDTH; x++ ) {
-			for( int y = 0; y < SCREEN_HEIGHT; y++ ) {	
-				int bufferInd = y*SCREEN_WIDTH+x;
+			for( int y = 0; y < SCREEN_HEIGHT; y++ ) {
+				int bufferInd = y*SCREEN_WIDTH + x;
 				pixel_buffer[ bufferInd ] = Pixel(0, 0, 0);
 			}
 		}
@@ -43,9 +39,18 @@ void clearImage() {
 }
 
 void keyboard(unsigned char key, int x, int y)  {
-	if( 'r' == key ) {
-		clearImage();
-		renderImage();
+	switch(key) {
+		case 'r':
+			clearImage();
+			renderImage();
+			break;
+
+		case 'm':
+			for(int i = 1; i < MaterialHandler::numMaterials(); i++) {
+				std::cout << '\n' << MaterialHandler::getMaterial(i);
+			}
+			std::cout << '\n';
+			break;
 	}
 }
 
@@ -55,36 +60,32 @@ void renderScene(void)  {
 }
 
 int main(int argc, char* argv[]) {
-	int num_models;
+	MaterialHandler::initialize();
+
 	if (argc != 2) {
 		std::cout << "requires scene filename\n";
 		return 1;
 	} else {
-		std::ifstream fin(argv[1]);
-		if (fin.is_open()) {
-			fin >> num_models;
-			for(int i = 0; i < num_models; i++) {
-				Model* model;
-				fin >> model;
-				if (model == NULL) {
-					std::cout << "invalid model\n";
-					return 1;
-				} else {
-					scene.addModel(model);
-				}
-			}
+		std::string path;
+		std::string filename;
+		parsePath(argv[1], path, filename);
+		bool ok = scene.loadScene(filename, path);
+		if (!ok) {
+			std::cout << "failed to load scene\n";
+			return 1;
+		} else {
+			std::cout << "models: " << scene.models.size() << '\n';
+			std::cout << "lights: " << scene.lights.size() << '\n';
+			std::cout << "materials: " << MaterialHandler::numMaterials() << '\n';
 		}
-		fin.close();
 	}
-
-	std::cout << "models: " << num_models << '\n';
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 
 	glutInitWindowPosition(100,100);
 	glutInitWindowSize( SCREEN_WIDTH, SCREEN_HEIGHT );
-	glutCreateWindow("Assignment 2");
+	glutCreateWindow("Assignment 2 | Eric Roberts");
 
 	glViewport( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );
 
@@ -93,10 +94,7 @@ int main(int argc, char* argv[]) {
 
 	glutKeyboardFunc( keyboard );
 	
-	initializeScene();
-	
 	glutMainLoop();
 
 	return(0);
 }
-
