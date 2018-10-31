@@ -28,7 +28,7 @@ public:
 	
 private:
 	int rec_depth;
-	Vec3 castRay(Vec3 origin, Vec3 direction, float total_distance = 0.0);
+	Vec3 castRay(Vec3 origin, Vec3 direction, float total_distance = 0.0, float refraction_index = 1.0);
 };
 
 #endif

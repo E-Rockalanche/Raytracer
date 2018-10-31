@@ -128,6 +128,7 @@ void Scene::render(int width, int height, Pixel* buffer) {
 				+ std::tan(y_angle) * camera_up;
 
 			Vec3 colour = castRay(camera_position, direction.normalize());
+
 			uchar red = std::min(colour.x, 1.0f) * 255;
 			uchar green = std::min(colour.y, 1.0f) * 255;
 			uchar blue = std::min(colour.z, 1.0f) * 255;
@@ -146,7 +147,7 @@ Vec3 attenuate(Vec3 colour, float distance) {
 	return colour / (1 + distance/1000);
 }
 
-Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance) {
+Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float refraction_index) {
 	Vec3 colour = Vec3(0, 0, 0); // black
 	
 	if (total_distance < far_distance) {
@@ -205,82 +206,84 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance) {
 			/*
 			add illumination from lights
 			*/
-			for(int l = 0; l < (int)lights.size(); l++) {
-				Light* light = lights[l];
-				
-				Vec3 light_dir = light->position - collision_point;
-				float light_distance = light_dir.length();
-				light_dir /= light_distance;
-
-				colour += light->colour * (use_texture ? (tex_colour/10) : material.ambient);
-				
-				bool can_see_light = true;
-				
-				for(int m = 0; m < (int)models.size(); m++) {
-					Model* cur_model = models[m];
-					float object_distance;
-					bool collided = cur_model->lineCollision(collision_point
-						+ light_dir/1000, light_dir, NULL, NULL, NULL, NULL, NULL, &object_distance);
-				
-					if (collided && object_distance < light_distance) {
-						can_see_light = false;
-						break;
-					}
-				}
-			
-				if (can_see_light) {
-					Vec3 proj = Vec3::project(light_dir, normal);
-					Vec3 specular_dir = light_dir - 2 * proj;
-
-					Vec3 attenuated_light = attenuate(light->colour, light_distance);
+			if (alpha > 0) {
+				for(int l = 0; l < (int)lights.size(); l++) {
+					Light* light = lights[l];
 					
-					float diffuse_dot = Vec3::dotProduct(light_dir, normal);
-					if (diffuse_dot > 0) {
-						colour += diffuse_dot * attenuated_light * (use_texture ? tex_colour : material.diffuse);
-					}
+					Vec3 light_dir = light->position - collision_point;
+					float light_distance = light_dir.length();
+					light_dir /= light_distance;
 
-					float specular_dot = Vec3::dotProduct(specular_dir, direction);
-					if (specular_dot > 0) {
-						colour += std::pow(specular_dot, material.specular_exponent)
-							* attenuated_light * material.specular;
+					colour += material.alpha * light->colour
+						* (use_texture ? (tex_colour/10) : material.ambient);
+					
+					bool can_see_light = true;
+					
+					for(int m = 0; m < (int)models.size(); m++) {
+						Model* cur_model = models[m];
+						float object_distance;
+						bool collided = cur_model->lineCollision(collision_point
+							+ light_dir/1000, light_dir, NULL, NULL, NULL, NULL, NULL, &object_distance);
+					
+						if (collided && object_distance < light_distance) {
+							can_see_light = false;
+							break;
+						}
+					}
+				
+					if (can_see_light) {
+						Vec3 proj = Vec3::project(light_dir, normal);
+						Vec3 specular_dir = light_dir - 2 * proj;
+
+						Vec3 attenuated_light = attenuate(light->colour, light_distance);
+						
+						float diffuse_dot = Vec3::dotProduct(light_dir, normal);
+						if (diffuse_dot > 0) {
+							colour += material.alpha * diffuse_dot * attenuated_light * (use_texture ? tex_colour : material.diffuse);
+						}
+
+						float specular_dot = Vec3::dotProduct(specular_dir, direction);
+						if (specular_dot > 0) {
+							colour += material.alpha * std::pow(specular_dot, material.specular_exponent)
+								* attenuated_light * material.specular;
+						}
 					}
 				}
+
+			
+				/*
+				add illumination from reflections off other models
+				*/
+				Vec3 proj = Vec3::project(direction, normal);
+				Vec3 reflection = Vec3::normalize(direction - 2 * proj);
+				
+				Vec3 reflect_colour = castRay(collision_point + reflection/1000,
+					reflection, total_distance, refraction_index);
+				
+				colour += reflect_colour * material.specular;
+				/*
+				// do we really need diffuse reflected light?
+				colour += Vec3::dotProduct(reflection, normal)
+					* reflect_colour
+					* material.diffuse;
+				*/
 			}
 
-			
-			/*
-			add illumination from reflections off other models
-			*/
-			Vec3 proj = Vec3::project(direction, normal);
-			Vec3 reflection = Vec3::normalize(direction - 2 * proj);
-			
-			Vec3 reflect_colour = castRay(collision_point + reflection/1000,
-				reflection, total_distance);
-			
-			colour += reflect_colour * material.specular;
-			/*
-			// do we really need diffuse reflected light?
-			colour += Vec3::dotProduct(reflection, normal)
-				* reflect_colour
-				* material.diffuse;
-			*/
-
-			/*
-			add illumination from light on other side of model
-			*/
-			/*
-			if (transparent_weight > 0) {
+			if (material.alpha < 1) {
+				/*
+				add illumination from light on other side of model
+				*/
 				float dot = Vec3::dotProduct(direction, normal);
 				if (dot != 0) {
-					float from_index = (dot < 0) ? refraction_index : (model->refraction_index);
-					float to_index = (dot < 0) ? (model->refraction_index) : refraction_index;
-					
+					bool going_in = dot < 0;
+					float from_index = going_in ? 1.0 : material.refraction_index;
+					float to_index = going_in ? material.refraction_index : 1.0;
+
 					Vec3 refracted = Vec3::refract(direction, normal, from_index, to_index);
 					Vec3 through_colour = castRay(collision_point + refracted/1000, refracted, total_distance, to_index);
-					colour += transparent_weight * through_colour;
+					colour += (1 - material.alpha) * through_colour;
 				}
 			}
-			*/
 			
 			colour = attenuate(colour, min_distance);
 		}
