@@ -20,6 +20,7 @@ Scene::Scene() {
 	fov = 90;
 	far_distance = 1000;
 	rec_depth = 0;
+	attenuation = 100;
 }
 
 void Scene::addModel(Model* model) {
@@ -87,6 +88,8 @@ bool Scene::loadScene(std::string filename, std::string path) {
 				float fov;
 				fin >> pos >> at >> up >> fov;
 				setCamera(pos, at, up, fov);
+			} else if (str == "attenuation") {
+				fin >> attenuation;
 			} else {
 				if (str[0] != '#') {
 					std::cout << "unknown token: " << str << '\n';
@@ -143,8 +146,8 @@ void Scene::render(int width, int height, Pixel* buffer) {
 
 // #define dout(message)
 
-Vec3 attenuate(Vec3 colour, float distance) {
-	return colour / (1 + distance/1000);
+Vec3 Scene::attenuate(const Vec3& colour, float distance) {
+	return colour / (1 + distance/attenuation);
 }
 
 Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float refraction_index) {
@@ -152,65 +155,55 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 	
 	if (total_distance < far_distance) {
 		direction.normalize();
-		
-		float min_distance = FLT_MAX;
-		Vec3 collision_point;
-		Vec3 normal;
-		float tex_x, tex_y;
-		Model* model = NULL;
 
-		int material_handle;
+		CollisionData collision_data;
+		collision_data.distance = FLT_MAX;
+		Model* model = NULL;
 		
 		/*
 		find the model the collides with the ray first
 		*/
 		for(int i = 0; i < (int)models.size(); i++) {
-			Vec3 cur_collision_point;
-			float cur_distance = FLT_MAX;
-			Vec3 cur_normal;
-			float cur_tex_x, cur_tex_y;
+			CollisionData cur_data;
+			cur_data.distance = FLT_MAX;
+
 			Model* cur_model = models[i];
-			int cur_material_handle;
 
 			bool collided = cur_model->lineCollision(origin, direction,
-				&cur_collision_point, &cur_normal, &cur_material_handle, &cur_tex_x, &cur_tex_y, &cur_distance);
+				&cur_data);
 
-			if (collided && (cur_distance < min_distance) && (Vec3::dotProduct(cur_normal, direction) < 0)) {
-				min_distance = cur_distance;
-				collision_point = cur_collision_point;
-				normal = cur_normal;
+			if (collided && (cur_data.distance < collision_data.distance)) {
+				collision_data = cur_data;
 				model = cur_model;
-				material_handle = cur_material_handle;
-				tex_x = cur_tex_x;
-				tex_y = cur_tex_y;
 			}
 		}
 
 
-		if (model != NULL && (total_distance + min_distance) <= far_distance) {
+		if (model != NULL && (total_distance + collision_data.distance) <= far_distance) {
 
-			total_distance += min_distance;
+			total_distance += collision_data.distance;
 			
-			if (Vec3::dotProduct(normal, direction) > 0) {
-				normal *= -1;
+			if (Vec3::dotProduct(collision_data.normal, direction) > 0) {
+				collision_data.normal *= -1;
 			}
 
-			const Material& material = MaterialHandler::getMaterial(material_handle);
+			const Material& material = MaterialHandler::getMaterial(collision_data.material_handle);
 			Vec3 tex_colour;
 			bool use_texture = material.diffuse_tex_handle != -1;
 			if (use_texture) {
 				const Texture& tex = TextureHandler::getTexture(material.diffuse_tex_handle);
-				tex_colour = tex.sampleColour(tex_x, tex_y, Texture::NEAREST);
+				tex_colour = tex.sampleColour(collision_data.tex_x,
+					collision_data.tex_y, Texture::NEAREST);
 			}
 			
 			/*
 			add illumination from lights
 			*/
-			if (alpha > 0) {
+			if (material.alpha > 0) {
 				for(int l = 0; l < (int)lights.size(); l++) {
 					Light* light = lights[l];
-					
-					Vec3 light_dir = light->position - collision_point;
+					Vec3 light_colour = light->colour;
+					Vec3 light_dir = light->position - collision_data.collision_point;
 					float light_distance = light_dir.length();
 					light_dir /= light_distance;
 
@@ -221,25 +214,32 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 					
 					for(int m = 0; m < (int)models.size(); m++) {
 						Model* cur_model = models[m];
-						float object_distance;
-						bool collided = cur_model->lineCollision(collision_point
-							+ light_dir/1000, light_dir, NULL, NULL, NULL, NULL, NULL, &object_distance);
+						CollisionData light_collision;
+						bool collided = cur_model->lineCollision(collision_data.collision_point
+							+ light_dir/1000, light_dir, &light_collision);
 					
-						if (collided && object_distance < light_distance) {
-							can_see_light = false;
-							break;
+						if (collided && (light_collision.distance < light_distance)) {
+							const Material& mat = MaterialHandler::getMaterial(light_collision.material_handle);
+							if (mat.alpha == 1) {
+								can_see_light = false;
+								break;
+							} else if (mat.alpha > 0) {
+								light_colour *= (1 - mat.alpha)
+									* (1 - mat.alpha);
+							}
 						}
 					}
 				
 					if (can_see_light) {
-						Vec3 proj = Vec3::project(light_dir, normal);
+						Vec3 proj = Vec3::project(light_dir, collision_data.normal);
 						Vec3 specular_dir = light_dir - 2 * proj;
 
-						Vec3 attenuated_light = attenuate(light->colour, light_distance);
+						Vec3 attenuated_light = attenuate(light_colour, light_distance);
 						
-						float diffuse_dot = Vec3::dotProduct(light_dir, normal);
+						float diffuse_dot = Vec3::dotProduct(light_dir, collision_data.normal);
 						if (diffuse_dot > 0) {
-							colour += material.alpha * diffuse_dot * attenuated_light * (use_texture ? tex_colour : material.diffuse);
+							colour += material.alpha * diffuse_dot * attenuated_light
+								* (use_texture ? tex_colour : material.diffuse);
 						}
 
 						float specular_dot = Vec3::dotProduct(specular_dir, direction);
@@ -254,10 +254,10 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 				/*
 				add illumination from reflections off other models
 				*/
-				Vec3 proj = Vec3::project(direction, normal);
+				Vec3 proj = Vec3::project(direction, collision_data.normal);
 				Vec3 reflection = Vec3::normalize(direction - 2 * proj);
 				
-				Vec3 reflect_colour = castRay(collision_point + reflection/1000,
+				Vec3 reflect_colour = castRay(collision_data.collision_point + reflection/1000,
 					reflection, total_distance, refraction_index);
 				
 				colour += reflect_colour * material.specular;
@@ -273,19 +273,21 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 				/*
 				add illumination from light on other side of model
 				*/
-				float dot = Vec3::dotProduct(direction, normal);
+				float dot = Vec3::dotProduct(direction, collision_data.normal);
 				if (dot != 0) {
 					bool going_in = dot < 0;
 					float from_index = going_in ? 1.0 : material.refraction_index;
 					float to_index = going_in ? material.refraction_index : 1.0;
 
-					Vec3 refracted = Vec3::refract(direction, normal, from_index, to_index);
-					Vec3 through_colour = castRay(collision_point + refracted/1000, refracted, total_distance, to_index);
+					Vec3 refracted = Vec3::refract(direction, collision_data.normal,
+						from_index, to_index);
+					Vec3 through_colour = castRay(collision_data.collision_point
+						+ refracted/1000, refracted, total_distance, to_index);
 					colour += (1 - material.alpha) * through_colour;
 				}
 			}
 			
-			colour = attenuate(colour, min_distance);
+			colour = attenuate(colour, collision_data.distance);
 		}
 	}
 

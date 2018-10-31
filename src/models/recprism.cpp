@@ -12,24 +12,23 @@ RecPrism::RecPrism(Vec3 position, Vec3 w, Vec3 h, Vec3 d, int material_handle)
 	faces[5] = Rectangle(position, w, d, material_handle);
 }
 
-bool RecPrism::lineCollision(Vec3 origin, Vec3 direction, Vec3* collision_point,
-		Vec3* normal, int* material_handle, float* tex_x, float* tex_y, float* distance) const {
+bool RecPrism::lineCollision(Vec3 origin, Vec3 direction, CollisionData* collision_data) const {
 	bool collided = false;
 	float min_distance = FLT_MAX;
 
 	for(int i = 0; i < FACES; i++) {
-		Vec3 cur_point;
-		Vec3 cur_normal;
-		int cur_material_handle;
-		float cur_distance = FLT_MAX;
-		bool cur_collided = faces[i].lineCollision(origin, direction, &cur_point, &cur_normal, &cur_material_handle, NULL, NULL, &cur_distance);
-		if (cur_collided && (cur_distance < min_distance)) {
-			min_distance = cur_distance;
-			assignPointer(collision_point, cur_point);
-			assignPointer(normal, cur_normal);
-			assignPointer(distance, cur_distance);
-			assignPointer(material_handle, cur_material_handle);
+		CollisionData cur_data;
+		bool cur_collided = faces[i].lineCollision(origin, direction, &cur_data);
+		if (cur_collided && (cur_data.distance < min_distance)) {
 			collided = true;
+			min_distance = cur_data.distance;
+
+			if (collision_data) {
+				collision_data->collision_point = cur_data.collision_point;
+				collision_data->normal = cur_data.normal;
+				collision_data->distance = cur_data.distance;
+				collision_data->material_handle = cur_data.material_handle;
+			}
 		}
 	}
 
