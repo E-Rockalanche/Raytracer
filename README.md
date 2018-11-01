@@ -4,8 +4,6 @@ Raytracer to render simple scenes.
 
 Capable of rendering spheres, planes, quads, triangles, and .obj models.
 
-Uses phong model and opacity to build colour of each ray.
-
 ## Scenes
 
 .scene files contain the information to build a scene
