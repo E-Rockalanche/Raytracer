@@ -116,9 +116,20 @@ public:
 
 	static const int FACES = 6;
 	Rectangle faces[FACES];
+	Vec3 w, h, d;
 };
 
-class PolygonModel : public Model {
+class ModelGroup : public Model {
+public:
+	ModelGroup() {}
+	virtual bool lineCollision(Vec3 origin, Vec3 direction,
+		CollidionData* collision_data) const;
+	void addModel(Model* model);
+
+	std::vector<Model*> models;
+};
+
+class PolygonModel : public ModelGroup {
 public:
 	PolygonModel() {}
 
@@ -127,24 +138,33 @@ public:
 
 	bool loadObjectFile(std::string filename, std::string path);
 
-	struct PolygonGroup {
-		std::vector<int> vertex_indices;
-		std::vector<int> normal_indices;
-		std::vector<int> tex_coord_indices;
-		std::string material_name;
-		std::string group_name;
-		int material_handle;
-
-		RecPrism bounds;
-
-		PolygonGroup() {}
-	};
-
 	std::vector<Vec3> vertices;
 	std::vector<Vec3> normals;
 	std::vector<float> tex_coords;
-
-	std::vector<PolygonGroup> groups;
 };
+
+class PolygonGroup : public Model {
+public:
+	PolygonGroup() {}
+	virtual bool lineCollision(Vec3 origin, Vec3 direction, CollidionData* collision_data) const;
+
+	std::vector<int> vertex_indices;
+	std::vector<int> normal_indices;
+	std::vector<int> tex_coord_indices;
+
+	PolygonModel* myModel;
+
+	std::string material_name;
+	std::string group_name;
+	int material_handle;
+
+	RecPrism bounds;
+};
+
+
+
+
+
+
 
 #endif

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <cctype>
 #include "models.hpp"
 #include "material_handler.hpp"
 #include "path.hpp"
@@ -86,6 +87,8 @@ bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, CollisionData* col
 	return collided;
 }
 
+#define checkStreamError(message) { if (fin.fail()) std::cout << message << " error\n"; }
+
 bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 	parsePath(path + filename, path, filename);
 
@@ -104,7 +107,7 @@ bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 
 		PolygonModel::PolygonGroup* cur_group = &groups[0];
 
-		Vec3 maximums = Vec3(FLT_MIN, FLT_MIN, FLT_MIN);
+		Vec3 maximums = Vec3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 		Vec3 minimums = Vec3(FLT_MAX, FLT_MAX, FLT_MAX);
 
 		while(!fin.fail()) {
@@ -119,8 +122,9 @@ bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 					if (!loaded) {
 						break;
 					}
+					checkStreamError("mtllib");
 				} else if (str == "g") {
-					// set boundins box of previous poly group
+					// set bounding box of previous poly group
 					cur_group->bounds = RecPrism(minimums, Vec3(maximums.x - minimums.x, 0, 0),
 						Vec3(0, maximums.y - minimums.y, 0),
 						Vec3(0, 0, maximums.z - minimums.z), 0);
@@ -132,26 +136,32 @@ bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 					cur_group = &groups.back();
 
 					// reset bounds
-					maximums = Vec3(FLT_MIN, FLT_MIN, FLT_MIN);
+					maximums = Vec3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 					minimums = Vec3(FLT_MAX, FLT_MAX, FLT_MAX);
+
+					checkStreamError("g");
 				} else if (str == "usemtl") {
 					std::string material_name;
 					fin >> material_name;
 					cur_group->material_handle = MaterialHandler::getHandle(material_name);
+					checkStreamError("usemtl");
 				} else if (str == "v") {
 					Vec3 v;
 					fin >> v;
+					checkStreamError("v");
 					vertices.push_back(v);
 				} else if (str == "vn") {
 					Vec3 n;
 					fin >> n;
 					normals.push_back(n);
+					checkStreamError("vn");
 				} else if (str == "vt") {
 					float u, v;
 					fin >> u >> v;
 					v = 1.0 - v;
 					tex_coords.push_back(u);
 					tex_coords.push_back(v);
+					checkStreamError("vt");
 				} else if (str == "f") {
 					for(int v = 0; v < 3; v++) {
 						for(int t = 0; t < 3; t++) {
@@ -160,14 +170,25 @@ bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 								if (c == '/') {
 									fin.get();
 								} else {
+									v = 3;
 									break;
 								}
 							}
+
 							int index;
-							fin >> index;
-							index--;
+							char c = fin.peek();
+							if (c == '/' || (std::isspace(c) && t > 0)) {
+								index = 0;
+							} else {
+								fin >> index;
+								index--;
+							}
+
 							if (t == 0) {
 								// vertex
+								if (index < 0 || index >= vertices.size()) {
+									std::cout << "vertex index out of bounds\n";
+								}
 								cur_group->vertex_indices.push_back(index);
 								const Vec3& vec = vertices[index];
 								for(int i = 0; i < 3; i++) {
@@ -180,13 +201,20 @@ bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 								}
 							} else if (t == 1) {
 								// tex coord
+								if (index < 0 || index >= vertices.size()) {
+									std::cout << "tex coord index out of bounds\n";
+								}
 								cur_group->tex_coord_indices.push_back(index);
 							} else if (t == 2) {
 								// normal
+								if (index < 0 || index >= vertices.size()) {
+									std::cout << "normal index out of bounds\n";
+								}
 								cur_group->normal_indices.push_back(index);
 							}
 						}
 					}
+					checkStreamError("f");
 				} else {
 					std::getline(fin, str);
 				}

@@ -3,7 +3,7 @@
 #include "material_handler.hpp"
 
 RecPrism::RecPrism(Vec3 position, Vec3 w, Vec3 h, Vec3 d, int material_handle)
-		: Model(position, material_handle) {
+		: Model(position, material_handle), w(w), h(h), d(d) {
 	faces[0] = Rectangle(position + d, w, h, material_handle);
 	faces[1] = Rectangle(position + w, h, d, material_handle);
 	faces[2] = Rectangle(position, h, w, material_handle);
