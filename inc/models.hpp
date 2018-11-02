@@ -126,7 +126,7 @@ public:
 		CollisionData* collision_data) const;
 
 	bool loadObjectFile(std::string filename, std::string path);
-	void generateNoisePatch(Vec3 position, Vec3 w, Vec3 h, float divisions, float octaves, float amplitude);
+	void generateNoisePatch(Vec3 position, Vec3 w, Vec3 h, float divisions, float amplitude, int material_handle);
 
 	struct PolygonGroup {
 		std::vector<int> vertex_indices;
@@ -137,8 +137,7 @@ public:
 		int material_handle;
 
 		RecPrism bounds;
-
-		PolygonGroup() {}
+		bool use_bounds = false;
 	};
 
 	std::vector<Vec3> vertices;

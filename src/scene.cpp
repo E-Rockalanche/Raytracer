@@ -76,8 +76,8 @@ bool Scene::loadScene(std::string filename, std::string path) {
 				int divisions, material_handle;
 				float amplitude;
 				std::string material_name;
-				fin >> pos >> w >> h >> divisions >> octaves >> material_name;
-				material_handle = MaterialHandler::gethandle(material_name);
+				fin >> pos >> w >> h >> divisions >> amplitude >> material_name;
+				material_handle = MaterialHandler::getHandle(material_name);
 				model->generateNoisePatch(pos, w, h, divisions, amplitude, material_handle);
 				addModel(model);
 			} else if (str == "usemtl") {

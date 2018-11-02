@@ -22,7 +22,7 @@ bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, CollisionData* col
 
 		const PolygonGroup& group = groups[g];
 
-		if (group.bounds.lineCollision(origin, direction, NULL)) {
+		if (!group.use_bounds || group.bounds.lineCollision(origin, direction, NULL)) {
 			int size = group.vertex_indices.size();
 			size -= size%3;
 			for(int f = 0; f < size-2; f += 3) {
@@ -103,7 +103,7 @@ bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 	if (fin.is_open()) {
 
 		PolygonModel::PolygonGroup* cur_group = &groups[0];
-
+		cur_group->use_bounds = true;
 		Vec3 maximums = Vec3(FLT_MIN, FLT_MIN, FLT_MIN);
 		Vec3 minimums = Vec3(FLT_MAX, FLT_MAX, FLT_MAX);
 
@@ -130,6 +130,7 @@ bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 					fin >> group_name;
 					groups.push_back(PolygonGroup());
 					cur_group = &groups.back();
+					cur_group->use_bounds = true;
 
 					// reset bounds
 					maximums = Vec3(FLT_MIN, FLT_MIN, FLT_MIN);
@@ -209,7 +210,11 @@ bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 	return ok;
 }
 
-void PolygonModel::generateNoisePach(Vec3 position, Vec3 w, Vec3 h,
+int getIndex(int x, int y, int octave) {
+	return (x*3 + y*5 + octave*7) % 256;
+}
+
+void PolygonModel::generateNoisePatch(Vec3 position, Vec3 w, Vec3 h,
 		float divisions, float amplitude, int material_handle) {
 	int width = divisions + 1;
 	int height = divisions + 1;
@@ -224,18 +229,44 @@ void PolygonModel::generateNoisePach(Vec3 position, Vec3 w, Vec3 h,
 
 	float randoms[256];
 	for(int i = 0; i < 256; i++) {
-		randoms = 2.0 * rand() / RAND_MAX - 1.0;
+		randoms[i] = amplitude * (2.0 * rand() / RAND_MAX - 1.0);
 	}
 
-	for(int x = 0; x < width; x++) {
-		for(int y = 0; y < height; y++) {
+
+	// debugging
+	const char* gradient = " .,:;xX#";
+	int gradient_length = 8;
+
+	std::cout << '\n';
+	for(int y = 0; y < height; y++) {
+		for(int x = 0; x < width; x++) {
 			int index = x + y*width;
 			float cur_amp = 0;
 			for(int i = 1; i <= divisions; i *= 2) {
-				cur_amp += randoms[getIndex((x*i)/divisions, (y*i)/divisions, i)] / i;
+				int xx = x*i/divisions;
+				int yy = y*i/divisions;
+				float amp_tl, amp_tr, amp_bl, amp_br;
+
+				amp_tl = randoms[getIndex(xx, yy, i)];
+				amp_tr = randoms[getIndex(xx+1, yy, i)];
+				amp_bl = randoms[getIndex(xx, yy+1, i)];
+				amp_br = randoms[getIndex(xx+1, yy+1, i)];
+
+				float xt = (float)x*i/divisions - xx;
+				float yt = (float)y*i/divisions - yy;
+
+				float amp_top = amp_tl + xt * (amp_tr - amp_tl);
+				float amp_bottom = amp_bl + yt * (amp_br - amp_bl);
+
+				cur_amp += (amp_top + yt * (amp_bottom - amp_top)) / i;
 			}
-			vertices[index] = position + w/divisions * x + h/divisions + cur_amp * normal;
+
+			int gradient_index = gradient_length * (cur_amp / (2.0 * amplitude) + 0.5);
+			std::cout << gradient[gradient_index] << ' ';
+
+			vertices[index] = position + (float)x * w/divisions + (float)y * h/divisions + cur_amp * normal;
 		}
+		std::cout << '\n';
 	}
 
 	for(int x = 0; x < width; x++) {
@@ -261,7 +292,7 @@ void PolygonModel::generateNoisePach(Vec3 position, Vec3 w, Vec3 h,
 				cur_norm += Vec3::crossProduct(neighbours[i] - center, neighbours[j] - center);
 			}
 
-			normal[x + y*width] = Vec3::normalize(cur_norm / num_neighbours);
+			normals[x + y*width] = Vec3::normalize(cur_norm / num_neighbours);
 		}
 	}
 
@@ -275,18 +306,13 @@ void PolygonModel::generateNoisePach(Vec3 position, Vec3 w, Vec3 h,
 			group.vertex_indices.push_back(x + (y+1)*width);
 			group.vertex_indices.push_back(x+1 + (y+1)*width);
 
-			group.normal_indices.push_back(x + y*width);
-			group.normal_indices.push_back(x + (y+1)*width);
-			group.normal_indices.push_back(x+1 + (y+1)*width);
-
 			// triangle 2
 			group.vertex_indices.push_back(x + y*width);
 			group.vertex_indices.push_back(x+1 + (y+1)*width);
 			group.vertex_indices.push_back(x+1 + y*width);
-
-			group.normal_indices.push_back(x + y*width);
-			group.normal_indices.push_back(x+1 + (y+1)*width);
-			group.normal_indices.push_back(x+1 + y*width);
 		}
 	}
+
+	group.normal_indices = std::vector<int>(group.vertex_indices);
+	group.tex_coord_indices = std::vector<int>(group.vertex_indices);
 }
