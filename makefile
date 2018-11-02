@@ -1,5 +1,5 @@
 TARGET := assignment2
-CLEAN := del .\obj\*.o .\obj\models\*.o $(TARGET)
+CLEAN := rm ./obj/*.o ./obj/models/*.o $(TARGET)
 CXX := g++
 
 CFLAGS_NIX := -c -Wall -Wextra -std=c++11 -I./inc
@@ -11,8 +11,8 @@ LFLAGS_WIN := -lm -static -lopengl32 -lglu32 -lglut32 -L"C:\MinGW\glut\lib" -L"C
 MODELS_SRC = $(wildcard ./src/models/*.cpp)
 MODELS_OBJ = $(patsubst ./src/models/%.cpp, ./obj/models/%.o, $(MODELS_SRC))
 
-MAKE_OBJ = $(CXX) $(CFLAGS_WIN) $< -o $@
-MAKE_EXE = $(CXX) $(LFLAGS_WIN) $^ -o $@
+MAKE_OBJ = $(CXX) $(CFLAGS_NIX) $< -o $@
+MAKE_EXE = $(CXX) $(LFLAGS_NIX) $^ -o $@
 
 $(TARGET): obj/main.o obj/scene.o obj/vec3.o obj/material.o obj/material_handler.o \
 		obj/path.o obj/texture.o obj/texture_handler.o obj/stb_image.o $(MODELS_OBJ)

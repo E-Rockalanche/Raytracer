@@ -1,5 +1,4 @@
-light 0 10 0   1 1 1
+light 0 0 0   1 1 1
 usemtl materials.mtl
-camera 0 5 5   0 0 -10   0 1 0   90
-noisepatch -10 0 -1    20 0 0   0 0 -20   8 1 water
-model sphere 0 0 -10   2   opaque_red
+camera 0 0 0   0 0 -10   0 1 0   90
+noisepatch -5 -5 -15    10 0 0   0 10 0   2 2 water

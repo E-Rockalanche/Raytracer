@@ -3,9 +3,16 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <stdexcept>
 #include "models.hpp"
 #include "material_handler.hpp"
 #include "path.hpp"
+
+void assert(bool condition, std::string message) {
+	if (!condition) {
+		throw std::runtime_error(message);
+	}
+}
 
 bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, CollisionData* collision_data) const {
 
@@ -23,9 +30,7 @@ bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, CollisionData* col
 		const PolygonGroup& group = groups[g];
 
 		if (!group.use_bounds || group.bounds.lineCollision(origin, direction, NULL)) {
-			int size = group.vertex_indices.size();
-			size -= size%3;
-			for(int f = 0; f < size-2; f += 3) {
+			for(int f = 0; (f+2) < (int)group.vertex_indices.size(); f += 3) {
 				Vec3 v1, v2, v3;
 				v1 = vertices[group.vertex_indices[f + 0]];
 				v2 = vertices[group.vertex_indices[f + 1]];
@@ -68,11 +73,23 @@ bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, CollisionData* col
 			Vec3 total_vec = Vec3::project(vecs[i] - vecs[j], side_dir);
 			Vec3 cur_vec = collision_data->collision_point - vecs[j];
 			float weight = Vec3::dotProduct(cur_vec, total_vec) / Vec3::dotProduct(total_vec, total_vec);
+
+			assert(face_index+i < (int)hit_group->normal_indices.size(), "index "
+				+std::to_string(face_index+i)+" out of normal indices bounds"
+				+std::to_string(hit_group->normal_indices.size()));
 			
 			int normal_index = hit_group->normal_indices[face_index + i];
+
+			assert(normal_index < (int)normals.size(), "index out of normal bounds");
+
 			collision_data->normal += weight * normals[normal_index];
 
+			assert(face_index + i < (int)hit_group->tex_coord_indices.size(), "index out of tex coord indices bounds");
+
 			int tex_coord_index = hit_group->tex_coord_indices[face_index + i] * 2;
+
+			assert(tex_coord_index+1 < (int)tex_coords.size(), "index out of tex coords bounds");
+
 			collision_data->tex_x += weight * tex_coords[tex_coord_index];
 			collision_data->tex_y += weight * tex_coords[tex_coord_index + 1];
 		}
@@ -223,11 +240,14 @@ void PolygonModel::generateNoisePatch(Vec3 position, Vec3 w, Vec3 h,
 
 	vertices.resize(size);
 	normals.resize(size);
-	tex_coords.resize(size);
+	tex_coords.resize(size * 2);
 	groups.clear();
 
 	Vec3 normal = Vec3::normalize(Vec3::crossProduct(w, h));
 
+	/*
+	set vertices
+	*/
 	float randoms[256];
 	for(int i = 0; i < 256; i++) {
 		randoms[i] = amplitude * (2.0 * rand() / RAND_MAX - 1.0);
@@ -239,7 +259,7 @@ void PolygonModel::generateNoisePatch(Vec3 position, Vec3 w, Vec3 h,
 	int gradient_length = 8;
 
 	std::cout << '\n';
-	for(int y = 0; y < height; y++) {
+	for(int y = height-1; y >= 0; y--) {
 		for(int x = 0; x < width; x++) {
 			int index = x + y*width;
 			float cur_amp = 0;
@@ -270,10 +290,20 @@ void PolygonModel::generateNoisePatch(Vec3 position, Vec3 w, Vec3 h,
 		std::cout << '\n';
 	}
 
+	/*
+	set normals
+	*/
+	const int x_dirs[] = {1, 0, -1, 0};
+	const int y_dirs[] = {0, 1, 0, -1};
+
+	#define random() (2.0 * rand()/RAND_MAX - 1.0)
+
 	for(int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
-			const int x_dirs[] = {1, 0, -1, 0};
-			const int y_dirs[] = {0, 1, 0, -1};
+			Vec3 cur_normal = Vec3::normalize(normal + random() * w/divisions/2.0 + random() * h/divisions/2.0);
+			normals[x + y*width] = cur_normal;
+			std::cout << "normal: " << cur_normal << '\n';
+			/*
 
 			int num_neighbours = 0;
 
@@ -299,10 +329,15 @@ void PolygonModel::generateNoisePatch(Vec3 position, Vec3 w, Vec3 h,
 			}
 
 			normals[x + y*width] = Vec3::normalize(vertex_norm / num_neighbours);
+			*/
 		}
+		std::cout << '\n';
 	}
 
-	groups.resize(1);
+	/*
+	set indices
+	*/
+	groups.resize(1, PolygonGroup());
 	PolygonGroup& group = groups[0];
 	group.material_handle = material_handle;
 	for(int x = 0; x < divisions; x++) {
@@ -321,4 +356,8 @@ void PolygonModel::generateNoisePatch(Vec3 position, Vec3 w, Vec3 h,
 
 	group.normal_indices = std::vector<int>(group.vertex_indices);
 	group.tex_coord_indices = std::vector<int>(group.vertex_indices);
+
+	std::cout << "vertices: " << vertices.size() << '\n';
+	std::cout << "normals: " << normals.size() << '\n';
+	std::cout << "faces: " << group.vertex_indices.size()/3 << '\n';
 }
