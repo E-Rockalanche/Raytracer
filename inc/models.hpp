@@ -6,8 +6,6 @@
 #include "vec3.hpp"
 #include "material.hpp"
 
-#define assignPointer(variable, value) { if ((variable) != NULL) *(variable) = (value); }
-
 struct CollisionData {
 	Vec3 collision_point;
 	Vec3 normal;
