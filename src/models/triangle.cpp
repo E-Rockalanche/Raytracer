@@ -21,7 +21,7 @@ bool Triangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 v1, Vec3 v2,
 				int j = (i+1)%3;
 				Vec3 side_dir = Vec3::crossProduct(normal, vertices[j] - vertices[i]);
 				Vec3 point_dir = point - vertices[i];
-				if (Vec3::dotProduct(side_dir, point_dir) < 0.0) {
+				if (Vec3::dotProduct(side_dir, point_dir) < -0.00001) {
 					intersected = false;
 					break;
 				}

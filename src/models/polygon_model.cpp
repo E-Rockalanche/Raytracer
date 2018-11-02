@@ -53,9 +53,8 @@ bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, CollisionData* col
 		}
 	}
 
-
 	if (collided && collision_data) {
-		collision_data->collision_point = origin + collision_data->distance * direction;
+		collision_data->collision_point = origin + position + collision_data->distance * direction;
 		collision_data->normal = Vec3(0, 0, 0);
 		collision_data->tex_x = 0;
 		collision_data->tex_y = 0;
@@ -216,6 +215,8 @@ int getIndex(int x, int y, int octave) {
 
 void PolygonModel::generateNoisePatch(Vec3 position, Vec3 w, Vec3 h,
 		float divisions, float amplitude, int material_handle) {
+	this->position = position;
+
 	int width = divisions + 1;
 	int height = divisions + 1;
 	int size = width * height;
@@ -252,11 +253,11 @@ void PolygonModel::generateNoisePatch(Vec3 position, Vec3 w, Vec3 h,
 				amp_bl = randoms[getIndex(xx, yy+1, i)];
 				amp_br = randoms[getIndex(xx+1, yy+1, i)];
 
-				float xt = (float)x*i/divisions - xx;
-				float yt = (float)y*i/divisions - yy;
+				float xt = ((float)x * i) / divisions - xx;
+				float yt = ((float)y * i) / divisions - yy;
 
 				float amp_top = amp_tl + xt * (amp_tr - amp_tl);
-				float amp_bottom = amp_bl + yt * (amp_br - amp_bl);
+				float amp_bottom = amp_bl + xt * (amp_br - amp_bl);
 
 				cur_amp += (amp_top + yt * (amp_bottom - amp_top)) / i;
 			}
@@ -264,35 +265,40 @@ void PolygonModel::generateNoisePatch(Vec3 position, Vec3 w, Vec3 h,
 			int gradient_index = gradient_length * (cur_amp / (2.0 * amplitude) + 0.5);
 			std::cout << gradient[gradient_index] << ' ';
 
-			vertices[index] = position + (float)x * w/divisions + (float)y * h/divisions + cur_amp * normal;
+			vertices[index] = (float)x * w/divisions + (float)y * h/divisions + cur_amp * normal;
 		}
 		std::cout << '\n';
 	}
 
 	for(int x = 0; x < width; x++) {
 		for (int y = 0; y < height; y++) {
-			int xr = (x+1)%width;
-			int xl = (x+width-1)%width;
-			int yb = (y+1)%height;
-			int yt = (y+height-1)%height;
+			const int x_dirs[] = {1, 0, -1, 0};
+			const int y_dirs[] = {0, 1, 0, -1};
 
-			const int num_neighbours = 4;
+			int num_neighbours = 0;
 
-			Vec3 neighbours[num_neighbours];
+			const Vec3& center = vertices[x + y*width];
 
-			Vec3 center = vertices[x + y*width];
-			neighbours[0] = vertices[xr + y*width];
-			neighbours[1] = vertices[x + yt*width];
-			neighbours[2] = vertices[xl + y*width];
-			neighbours[3] = vertices[x + yb*width];
-
-			Vec3 cur_norm;
-			for(int i = 0; i < num_neighbours; i++) {
-				int j = (i+1)%num_neighbours;
-				cur_norm += Vec3::crossProduct(neighbours[i] - center, neighbours[j] - center);
+			Vec3 vertex_norm;
+			for(int d = 0; d < 4; d++) {
+				int x1 = x + x_dirs[d];
+				int y1 = y + y_dirs[d];
+				if (x1 >= 0 && y1 >= 0 && x1 < width && y1 < height) {
+					int x2 = x + x_dirs[(d+1)%4];
+					int y2 = y + y_dirs[(d+1)%4];
+					if (x2 >= 0 && y2 >= 0 && x2 < width && y2 < height) {
+						num_neighbours++;
+						vertex_norm += Vec3::crossProduct(vertices[x1 + y1*width] - center,
+							vertices[x2 + y2*width] - center);
+					}
+				}
 			}
 
-			normals[x + y*width] = Vec3::normalize(cur_norm / num_neighbours);
+			if (num_neighbours == 0) {
+				vertex_norm = normal;
+			}
+
+			normals[x + y*width] = Vec3::normalize(vertex_norm / num_neighbours);
 		}
 	}
 
@@ -303,13 +309,13 @@ void PolygonModel::generateNoisePatch(Vec3 position, Vec3 w, Vec3 h,
 		for(int y = 0; y < divisions; y++) {
 			// triangle 1
 			group.vertex_indices.push_back(x + y*width);
-			group.vertex_indices.push_back(x + (y+1)*width);
 			group.vertex_indices.push_back(x+1 + (y+1)*width);
+			group.vertex_indices.push_back(x + (y+1)*width);
 
 			// triangle 2
 			group.vertex_indices.push_back(x + y*width);
-			group.vertex_indices.push_back(x+1 + (y+1)*width);
 			group.vertex_indices.push_back(x+1 + y*width);
+			group.vertex_indices.push_back(x+1 + (y+1)*width);
 		}
 	}
 

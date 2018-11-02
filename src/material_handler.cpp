@@ -17,9 +17,9 @@ void MaterialHandler::initialize() {
 	materials.clear();
 	name_map.clear();
 
-	Vec3 purple(1, 0, 1);
+	Vec3 default_colour(1, 1, 1);
 
-	materials.push_back(Material(purple, purple, purple, 0));
+	materials.push_back(Material(default_colour, default_colour, default_colour, 0));
 }
 
 int MaterialHandler::numMaterials() {
