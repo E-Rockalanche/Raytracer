@@ -70,6 +70,16 @@ bool Scene::loadScene(std::string filename, std::string path) {
 					delete model;
 					break;
 				}
+			} else if (str == "noisepatch") {
+				PolygonModel* model = new PolygonModel();
+				Vec3 pos, w, h;
+				int divisions, material_handle;
+				float amplitude;
+				std::string material_name;
+				fin >> pos >> w >> h >> divisions >> octaves >> material_name;
+				material_handle = MaterialHandler::gethandle(material_name);
+				model->generateNoisePatch(pos, w, h, divisions, amplitude, material_handle);
+				addModel(model);
 			} else if (str == "usemtl") {
 				std::string mat_filename;
 				fin >> mat_filename;

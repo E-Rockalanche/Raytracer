@@ -126,6 +126,7 @@ public:
 		CollisionData* collision_data) const;
 
 	bool loadObjectFile(std::string filename, std::string path);
+	void generateNoisePatch(Vec3 position, Vec3 w, Vec3 h, float divisions, float octaves, float amplitude);
 
 	struct PolygonGroup {
 		std::vector<int> vertex_indices;

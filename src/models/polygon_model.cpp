@@ -208,3 +208,85 @@ bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 
 	return ok;
 }
+
+void PolygonModel::generateNoisePach(Vec3 position, Vec3 w, Vec3 h,
+		float divisions, float amplitude, int material_handle) {
+	int width = divisions + 1;
+	int height = divisions + 1;
+	int size = width * height;
+
+	vertices.resize(size);
+	normals.resize(size);
+	tex_coords.resize(size);
+	groups.clear();
+
+	Vec3 normal = Vec3::normalize(Vec3::crossProduct(w, h));
+
+	float randoms[256];
+	for(int i = 0; i < 256; i++) {
+		randoms = 2.0 * rand() / RAND_MAX - 1.0;
+	}
+
+	for(int x = 0; x < width; x++) {
+		for(int y = 0; y < height; y++) {
+			int index = x + y*width;
+			float cur_amp = 0;
+			for(int i = 1; i <= divisions; i *= 2) {
+				cur_amp += randoms[getIndex((x*i)/divisions, (y*i)/divisions, i)] / i;
+			}
+			vertices[index] = position + w/divisions * x + h/divisions + cur_amp * normal;
+		}
+	}
+
+	for(int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			int xr = (x+1)%width;
+			int xl = (x+width-1)%width;
+			int yb = (y+1)%height;
+			int yt = (y+height-1)%height;
+
+			const int num_neighbours = 4;
+
+			Vec3 neighbours[num_neighbours];
+
+			Vec3 center = vertices[x + y*width];
+			neighbours[0] = vertices[xr + y*width];
+			neighbours[1] = vertices[x + yt*width];
+			neighbours[2] = vertices[xl + y*width];
+			neighbours[3] = vertices[x + yb*width];
+
+			Vec3 cur_norm;
+			for(int i = 0; i < num_neighbours; i++) {
+				int j = (i+1)%num_neighbours;
+				cur_norm += Vec3::crossProduct(neighbours[i] - center, neighbours[j] - center);
+			}
+
+			normal[x + y*width] = Vec3::normalize(cur_norm / num_neighbours);
+		}
+	}
+
+	groups.resize(1);
+	PolygonGroup& group = groups[0];
+	group.material_handle = material_handle;
+	for(int x = 0; x < divisions; x++) {
+		for(int y = 0; y < divisions; y++) {
+			// triangle 1
+			group.vertex_indices.push_back(x + y*width);
+			group.vertex_indices.push_back(x + (y+1)*width);
+			group.vertex_indices.push_back(x+1 + (y+1)*width);
+
+			group.normal_indices.push_back(x + y*width);
+			group.normal_indices.push_back(x + (y+1)*width);
+			group.normal_indices.push_back(x+1 + (y+1)*width);
+
+			// triangle 2
+			group.vertex_indices.push_back(x + y*width);
+			group.vertex_indices.push_back(x+1 + (y+1)*width);
+			group.vertex_indices.push_back(x+1 + y*width);
+
+			group.normal_indices.push_back(x + y*width);
+			group.normal_indices.push_back(x+1 + (y+1)*width);
+			group.normal_indices.push_back(x+1 + y*width);
+		}
+	}
+}
