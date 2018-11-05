@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <ctime>
 #include <fstream>
+#include <stdexcept>
+#include <cmath>
 
 #include "scene.hpp"
 #include "material_handler.hpp"
@@ -18,9 +20,9 @@ Scene::Scene() {
 	camera_up = Vec3(0, 1, 0);
 	camera_right = Vec3(1, 0, 0);
 	fov = 90;
-	far_distance = 1000;
 	rec_depth = 0;
 	attenuation = 100;
+	far_distance = 100;
 }
 
 void Scene::addModel(Model* model) {
@@ -53,48 +55,52 @@ bool Scene::loadScene(std::string filename, std::string path) {
 		while(!fin.fail()) {
 			std::string str;
 			fin >> str;
-			if (str == "model") {
-				Model* model;
-				fin >> model;
-				addModel(model);
-			} else if (str == "polygonmodel") {
-				PolygonModel* model = new PolygonModel();
-				Vec3 pos;
-				std::string obj_filename;
-				fin >> pos >> obj_filename;
-				if (model->loadObjectFile(obj_filename, path)) {
-					model->position = pos;
+			if (str.size() > 0) {
+				if (str == "model") {
+					Model* model;
+					fin >> model;
 					addModel(model);
+				} else if (str == "polygonmodel") {
+					PolygonModel* model = new PolygonModel();
+					Vec3 pos;
+					std::string obj_filename;
+					fin >> pos >> obj_filename;
+					if (model->loadObjectFile(obj_filename, path)) {
+						model->position = pos;
+						addModel(model);
+					} else {
+						std::cout << "could not load polygonmodel\n";
+						delete model;
+						break;
+					}
+				} else if (str == "usemtl") {
+					std::string mat_filename;
+					fin >> mat_filename;
+					bool loaded_mat = MaterialHandler::loadMaterialFile(mat_filename, path);
+					if (!loaded_mat) {
+						ok = false;
+						break;
+					}
+				} else if (str == "light") {
+					Vec3 pos, colour;
+					fin >> pos >> colour;
+					Light* light = new Light(pos, colour);
+					addLight(light);
+				} else if (str == "camera") {
+					Vec3 pos, at, up;
+					float fov;
+					fin >> pos >> at >> up >> fov;
+					setCamera(pos, at, up, fov);
+				} else if (str == "attenuation") {
+					fin >> attenuation;
+				} else if (str == "far") {
+					fin >> far_distance;
 				} else {
-					std::cout << "could not load polygonmodel\n";
-					delete model;
-					break;
+					if (str[0] != '#') {
+						std::cout << "unknown token: " << str << '\n';
+					}
+					getline(fin, str);
 				}
-			} else if (str == "usemtl") {
-				std::string mat_filename;
-				fin >> mat_filename;
-				bool loaded_mat = MaterialHandler::loadMaterialFile(mat_filename, path);
-				if (!loaded_mat) {
-					ok = false;
-					break;
-				}
-			} else if (str == "light") {
-				Vec3 pos, colour;
-				fin >> pos >> colour;
-				Light* light = new Light(pos, colour);
-				addLight(light);
-			} else if (str == "camera") {
-				Vec3 pos, at, up;
-				float fov;
-				fin >> pos >> at >> up >> fov;
-				setCamera(pos, at, up, fov);
-			} else if (str == "attenuation") {
-				fin >> attenuation;
-			} else {
-				if (str[0] != '#') {
-					std::cout << "unknown token: " << str << '\n';
-				}
-				getline(fin, str);
 			}
 		}
 
@@ -147,7 +153,7 @@ void Scene::render(int width, int height, Pixel* buffer) {
 // #define dout(message)
 
 Vec3 Scene::attenuate(const Vec3& colour, float distance) {
-	return colour / (1 + distance/attenuation);
+	return colour / (1 + distance*distance/attenuation);
 }
 
 Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float refraction_index) {
@@ -169,6 +175,10 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 
 			Model* cur_model = models[i];
 
+			if (cur_model == NULL) {
+				throw std::runtime_error("cur model is NULL");
+			}
+
 			bool collided = cur_model->lineCollision(origin, direction,
 				&cur_data);
 
@@ -180,98 +190,101 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 
 
 		if (model != NULL && (total_distance + collision_data.distance) <= far_distance) {
-
 			total_distance += collision_data.distance;
-			
-			if (Vec3::dotProduct(collision_data.normal, direction) > 0) {
-				collision_data.normal *= -1;
-			}
 
 			const Material& material = MaterialHandler::getMaterial(collision_data.material_handle);
-			Vec3 tex_colour;
-			bool use_texture = material.diffuse_tex_handle != -1;
-			if (use_texture) {
-				const Texture& tex = TextureHandler::getTexture(material.diffuse_tex_handle);
-				tex_colour = tex.sampleColour(collision_data.tex_x,
-					collision_data.tex_y, Texture::NEAREST);
-			}
 			
-			/*
-			add illumination from lights
-			*/
-			if (material.alpha > 0) {
-				for(int l = 0; l < (int)lights.size(); l++) {
-					Light* light = lights[l];
-					Vec3 light_colour = light->colour;
-					Vec3 light_dir = light->position - collision_data.collision_point;
-					float light_distance = light_dir.length();
-					light_dir /= light_distance;
+			if (Vec3::dotProduct(collision_data.normal, direction) < 0) {
+				/*
+				get texture coords if in use
+				*/
+				Vec3 tex_colour;
+				bool use_texture = material.diffuse_tex_handle >= 0;
+				if (use_texture) {
+					const Texture& tex = TextureHandler::getTexture(material.diffuse_tex_handle);
+					tex_colour = tex.sampleColour(collision_data.tex_x,
+						collision_data.tex_y, Texture::NEAREST);
+				}
+				
+				/*
+				add illumination from lights
+				*/
+				if (material.alpha > 0) {
+					for(int l = 0; l < (int)lights.size(); l++) {
+						Light* light = lights[l];
+						Vec3 light_colour = light->colour;
+						Vec3 light_dir = light->position - collision_data.collision_point;
+						float light_distance = light_dir.length();
+						light_dir /= light_distance;
 
-					colour += material.alpha * light->colour
-						* (use_texture ? (tex_colour/10) : material.ambient);
+						colour += material.alpha * light->colour
+							* (use_texture ? (tex_colour/10) : material.ambient);
+						
+						bool can_see_light = true;
+						
+						for(int m = 0; m < (int)models.size(); m++) {
+							Model* cur_model = models[m];
+							CollisionData light_collision;
+							bool collided = cur_model->lineCollision(collision_data.collision_point
+								+ light_dir/1000, light_dir, &light_collision);
+						
+							if (collided && (light_collision.distance < light_distance)) {
+								const Material& mat = MaterialHandler::getMaterial(light_collision.material_handle);
+								if (mat.alpha == 1) {
+									can_see_light = false;
+									break;
+								} else if (mat.alpha > 0) {
+									light_colour *= (1 - mat.alpha)
+										* (1 - mat.alpha);
+								}
+							}
+						}
 					
-					bool can_see_light = true;
-					
-					for(int m = 0; m < (int)models.size(); m++) {
-						Model* cur_model = models[m];
-						CollisionData light_collision;
-						bool collided = cur_model->lineCollision(collision_data.collision_point
-							+ light_dir/1000, light_dir, &light_collision);
-					
-						if (collided && (light_collision.distance < light_distance)) {
-							const Material& mat = MaterialHandler::getMaterial(light_collision.material_handle);
-							if (mat.alpha == 1) {
-								can_see_light = false;
-								break;
-							} else if (mat.alpha > 0) {
-								light_colour *= (1 - mat.alpha)
-									* (1 - mat.alpha);
+						if (can_see_light) {
+							Vec3 proj = Vec3::project(light_dir, collision_data.normal);
+							Vec3 specular_dir = light_dir - 2 * proj;
+
+							Vec3 attenuated_light = attenuate(light_colour, light_distance);
+							
+							float diffuse_dot = Vec3::dotProduct(light_dir, collision_data.normal);
+							if (diffuse_dot > 0) {
+								colour += material.alpha * diffuse_dot * attenuated_light
+									* (use_texture ? tex_colour : material.diffuse);
+							}
+
+							float specular_dot = Vec3::dotProduct(specular_dir, direction);
+							if (specular_dot > 0) {
+								colour += material.alpha * std::pow(specular_dot, material.specular_exponent)
+									* attenuated_light * material.specular;
 							}
 						}
 					}
+
 				
-					if (can_see_light) {
-						Vec3 proj = Vec3::project(light_dir, collision_data.normal);
-						Vec3 specular_dir = light_dir - 2 * proj;
-
-						Vec3 attenuated_light = attenuate(light_colour, light_distance);
-						
-						float diffuse_dot = Vec3::dotProduct(light_dir, collision_data.normal);
-						if (diffuse_dot > 0) {
-							colour += material.alpha * diffuse_dot * attenuated_light
-								* (use_texture ? tex_colour : material.diffuse);
-						}
-
-						float specular_dot = Vec3::dotProduct(specular_dir, direction);
-						if (specular_dot > 0) {
-							colour += material.alpha * std::pow(specular_dot, material.specular_exponent)
-								* attenuated_light * material.specular;
-						}
-					}
+					/*
+					add illumination from reflections off other models
+					*/
+					Vec3 proj = Vec3::project(direction, collision_data.normal);
+					Vec3 reflection = Vec3::normalize(direction - 2 * proj);
+					
+					Vec3 reflect_colour = castRay(collision_data.collision_point + reflection/1000,
+						reflection, total_distance, refraction_index);
+					
+					colour += reflect_colour * material.specular;
+					
+					/*
+					// do we need diffuse reflected light?
+					colour += Vec3::dotProduct(reflection, collision_data.normal)
+						* reflect_colour
+						* material.diffuse;
+					*/
+					
 				}
-
-			
-				/*
-				add illumination from reflections off other models
-				*/
-				Vec3 proj = Vec3::project(direction, collision_data.normal);
-				Vec3 reflection = Vec3::normalize(direction - 2 * proj);
-				
-				Vec3 reflect_colour = castRay(collision_data.collision_point + reflection/1000,
-					reflection, total_distance, refraction_index);
-				
-				colour += reflect_colour * material.specular;
-				/*
-				// do we really need diffuse reflected light?
-				colour += Vec3::dotProduct(reflection, normal)
-					* reflect_colour
-					* material.diffuse;
-				*/
 			}
 
 			if (material.alpha < 1) {
 				/*
-				add illumination from light on other side of model
+				add illumination through model
 				*/
 				float dot = Vec3::dotProduct(direction, collision_data.normal);
 				if (dot != 0) {

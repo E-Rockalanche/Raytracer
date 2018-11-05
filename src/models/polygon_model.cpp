@@ -8,7 +8,6 @@
 #include "path.hpp"
 
 bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, CollisionData* collision_data) const {
-
 	bool collided = false;
 	float min_distance = FLT_MAX;
 
@@ -24,8 +23,7 @@ bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, CollisionData* col
 
 		if (group.bounds.lineCollision(origin, direction, NULL)) {
 			int size = group.vertex_indices.size();
-			size -= size%3;
-			for(int f = 0; f < size-2; f += 3) {
+			for(int f = 0; f+2 < size; f += 3) {
 				Vec3 v1, v2, v3;
 				v1 = vertices[group.vertex_indices[f + 0]];
 				v2 = vertices[group.vertex_indices[f + 1]];
@@ -55,7 +53,8 @@ bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, CollisionData* col
 
 
 	if (collided && collision_data) {
-		collision_data->collision_point = origin + collision_data->distance * direction;
+		Vec3 local_point = origin + collision_data->distance * direction;
+		collision_data->collision_point = local_point + position;
 		collision_data->normal = Vec3(0, 0, 0);
 		collision_data->tex_x = 0;
 		collision_data->tex_y = 0;
@@ -65,9 +64,10 @@ bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, CollisionData* col
 		for(int i = 0; i < 3; i++) {
 			int j = (i+1)%3;
 			int k = (i+2)%3;
+			
 			Vec3 side_dir = Vec3::crossProduct(tri_normal, vecs[k] - vecs[j]);
 			Vec3 total_vec = Vec3::project(vecs[i] - vecs[j], side_dir);
-			Vec3 cur_vec = collision_data->collision_point - vecs[j];
+			Vec3 cur_vec = local_point - vecs[j];
 			float weight = Vec3::dotProduct(cur_vec, total_vec) / Vec3::dotProduct(total_vec, total_vec);
 			
 			int normal_index = hit_group->normal_indices[face_index + i];
@@ -76,10 +76,6 @@ bool PolygonModel::lineCollision(Vec3 origin, Vec3 direction, CollisionData* col
 			int tex_coord_index = hit_group->tex_coord_indices[face_index + i] * 2;
 			collision_data->tex_x += weight * tex_coords[tex_coord_index];
 			collision_data->tex_y += weight * tex_coords[tex_coord_index + 1];
-		}
-
-		if (Vec3::dotProduct(collision_data->normal, direction) > 0) {
-			collided = false;
 		}
 	}
 
