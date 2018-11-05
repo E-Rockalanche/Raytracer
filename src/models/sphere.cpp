@@ -1,7 +1,8 @@
-
 #include <cmath>
 #include "models.hpp"
 #include "material_handler.hpp"
+
+#define dout(message)
 
 Sphere::Sphere(Vec3 position, float radius, int material_handle)
 	: Model(position, material_handle), radius(radius) {}
@@ -12,13 +13,23 @@ bool Sphere::lineIntersection(Vec3 origin, Vec3 direction, Vec3 position, float 
 	float a = Vec3::dotProduct(direction, direction);
 	float b = 2 * Vec3::dotProduct(dist, direction);
 	float c = Vec3::dotProduct(dist, dist) - radius*radius;
+
 	if (a != 0.0) {
 		float det = b*b - 4.0*a*c;
 		if (det >= 0.0) {
 			float sqrt_det = std::sqrt(det);
 			t = (-b - sqrt_det) / (2.0 * a);
 
-			intersected = (t > 0.0);
+			// intersected = (t >= 0);
+
+			if (t >= 0) {
+				intersected = true;
+			} else {
+				t = (-b + sqrt_det) / (2.0 * a);
+				if (t >= 0) {
+					intersected = true;
+				}
+			}
 		}
 	}
 	return intersected;

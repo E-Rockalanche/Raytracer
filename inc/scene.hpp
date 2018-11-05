@@ -21,8 +21,8 @@ public:
 	Vec3 camera_up;
 	Vec3 camera_right;
 	float fov;
-	float far_distance;
 	float attenuation;
+	float far_distance;
 
 	std::vector<Model*> models;
 	std::vector<Light*> lights;

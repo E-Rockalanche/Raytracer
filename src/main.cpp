@@ -12,6 +12,7 @@
 #include "vec3.hpp"
 #include "light.hpp"
 #include "material_handler.hpp"
+#include "texture_handler.hpp"
 #include "path.hpp"
 
 #define SCREEN_WIDTH 512
@@ -95,6 +96,8 @@ int main(int argc, char* argv[]) {
 	glutKeyboardFunc( keyboard );
 	
 	glutMainLoop();
+
+	TextureHandler::clear();
 
 	return(0);
 }
