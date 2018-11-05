@@ -16,6 +16,7 @@ int TextureHandler::loadTextureFile(std::string filename) {
 		int width, height, channels;
 		unsigned char* data = stbi_load(filename.c_str(), &width, &height, &channels, 0);
 		if (data == NULL) {
+			std::cout << "cannot load " << filename << '\n';
 			handle = -1;
 		} else {
 			handle = textures.size();
@@ -44,4 +45,13 @@ Texture& TextureHandler::getTexture(int index) {
 
 int TextureHandler::numTextures() {
 	return textures.size();
+}
+
+void TextureHandler::clear() {
+	for (int i = 0; i < (int)textures.size(); i++) {
+		if (textures[i].data) {
+			delete[] textures[i].data;
+		}
+	}
+	textures.clear();
 }

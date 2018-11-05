@@ -12,6 +12,7 @@ public:
 	static int getHandle(std::string texture_name);
 	static Texture& getTexture(int index);
 	static int numTextures();
+	static void clear();
 private:
 	static std::map<std::string, int> name_map;
 	static std::vector<Texture> textures;

@@ -1,0 +1,10 @@
+camera 0 5 0   0 5 -30   0 1 0   90
+
+light 0 5 0   1 1 1
+
+polygonmodel 0 0 -30 samus/samus.obj
+
+usemtl materials.mtl
+model plane 0 0 0   1 0 0   0 0 -1   dark_mirror
+
+attenuation 10000
