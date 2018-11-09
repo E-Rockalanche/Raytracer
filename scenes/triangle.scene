@@ -1,5 +1,0 @@
-usemtl materials.mtl
-light 0 5 10 1 1 1
-camera 0 0 0   0 0 -1   0 1 0   90
-model triangle 0 0 -10   1 0 -10   1 1 -10   opaque_blue
-model sphere -0.5 0.5 -10   0.5   opaque_green

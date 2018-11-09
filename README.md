@@ -80,14 +80,14 @@ ex)
 polygonmodel samus.obj
 ```
 
-### usemtl
+### mtllib
 
 specifies a .mtl file to use
 
 ex)
 ```
 # can define transparent and mirror like materials
-usemtl materials.mtl
+mtllib materials.mtl
 ```
 
 ### light

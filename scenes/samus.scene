@@ -4,7 +4,7 @@ light 0 5 0   1 1 1
 
 polygonmodel 0 0 -30 samus/samus.obj
 
-usemtl materials.mtl
+mtllib materials.mtl
 model plane 0 0 0   1 0 0   0 0 -1   dark_mirror
 
 attenuation 10000

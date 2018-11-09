@@ -73,7 +73,7 @@ bool Scene::loadScene(std::string filename, std::string path) {
 						delete model;
 						break;
 					}
-				} else if (str == "usemtl") {
+				} else if (str == "mtllib") {
 					std::string mat_filename;
 					fin >> mat_filename;
 					bool loaded_mat = MaterialHandler::loadMaterialFile(mat_filename, path);
@@ -217,6 +217,9 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 						float light_distance = light_dir.length();
 						light_dir /= light_distance;
 
+						/*
+						ambient
+						*/
 						colour += material.alpha * light->colour
 							* (use_texture ? (tex_colour/10) : material.ambient);
 						
@@ -234,8 +237,7 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 									can_see_light = false;
 									break;
 								} else if (mat.alpha > 0) {
-									light_colour *= (1 - mat.alpha)
-										* (1 - mat.alpha);
+									light_colour *= (1 - mat.alpha) * mat.transmission_filter;
 								}
 							}
 						}
@@ -270,7 +272,7 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 					Vec3 reflect_colour = castRay(collision_data.collision_point + reflection/1000,
 						reflection, total_distance, refraction_index);
 					
-					colour += reflect_colour * material.specular;
+					colour += material.alpha * reflect_colour * material.specular;
 					
 					/*
 					// do we need diffuse reflected light?
