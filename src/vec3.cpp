@@ -114,7 +114,7 @@ float& Vec3::operator[](int index) {
 		case 2:
 			return z;
 		default:
-			throw std::runtime_error("vertex index out of bounds: "+std::to_string(index));
+			throw std::runtime_error("Vec3 index out of bounds: "+std::to_string(index));
 	}
 }
 
@@ -127,7 +127,7 @@ float Vec3::operator[](int index) const {
 		case 2:
 			return z;
 		default:
-			throw std::runtime_error("vertex index out of bounds: "+std::to_string(index));
+			throw std::runtime_error("Vec3 index out of bounds: "+std::to_string(index));
 	}
 }
 

@@ -193,6 +193,10 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 			total_distance += collision_data.distance;
 
 			const Material& material = MaterialHandler::getMaterial(collision_data.material_handle);
+
+			Vec3 diffuse = material.diffuse;
+			Vec3 ambient = material.ambient;
+			float alpha = material.alpha;
 			
 			if (Vec3::dotProduct(collision_data.normal, direction) < 0) {
 				/*
@@ -202,8 +206,11 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 				bool use_texture = material.diffuse_tex_handle >= 0;
 				if (use_texture) {
 					const Texture& tex = TextureHandler::getTexture(material.diffuse_tex_handle);
-					tex_colour = tex.sampleColour(collision_data.tex_x,
+					Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
 						collision_data.tex_y, Texture::NEAREST);
+					diffuse = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
+					ambient = diffuse/10;
+					alpha *= tex_colour.w;
 				}
 				
 				/*
