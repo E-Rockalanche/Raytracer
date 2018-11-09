@@ -291,6 +291,7 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 				float dot = Vec3::dotProduct(direction, collision_data.normal);
 				if (dot != 0) {
 					bool going_in = dot < 0;
+
 					float from_index = going_in ? 1.0 : material.refraction_index;
 					float to_index = going_in ? material.refraction_index : 1.0;
 
@@ -298,7 +299,13 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 						from_index, to_index);
 					Vec3 through_colour = castRay(collision_data.collision_point
 						+ refracted/1000, refracted, total_distance, to_index);
-					colour += (1 - material.alpha) * through_colour;
+
+					if (going_in) {
+						colour += through_colour;
+					} else {
+						colour += (1 - material.alpha) * material.transmission_filter * through_colour;
+					}
+					// colour += (1 - material.alpha) * through_colour;
 				}
 			}
 			

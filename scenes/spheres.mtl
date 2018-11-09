@@ -1,0 +1,19 @@
+newmtl earth
+map_Kd earth.jpeg
+Ks 0 0 0
+Ka 0 0 0
+
+newmtl jupiter
+map_Kd jupiter.jpeg
+Ks 0 0 0
+Ka 0 0 0
+
+newmtl wood_sphere
+map_Kd wood_sphere.jpeg
+Ks 0 0 0
+Ka 0 0 0
+
+newmtl planet
+map_Kd planet.jpeg
+Ks 0 0 0
+Ka 0 0 0

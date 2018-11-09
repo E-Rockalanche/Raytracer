@@ -25,7 +25,7 @@ Vec3 Texture::samplePixel(int x, int y) const {
 	if (x < 0 || y < 0 || x >= width || y >= height) {
 		throw std::runtime_error("texture sample position out of bounds");
 	}
-	unsigned char* p = data + (x + y*width) * channels;
+	unsigned char* p = data + (x + (height - y - 1)*width) * channels;
 	return Vec3(p[0]/255.0, p[1]/255.0, p[2]/255.0);
 }
 
