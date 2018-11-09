@@ -162,7 +162,7 @@ Vec3 Vec3::project(Vec3 v, Vec3 onto) {
 Vec3 Vec3::refract(Vec3 v, Vec3 normal, float index1, float index2) {
 	Vec3 proj = Vec3::project(v, normal);
 	Vec3 ortho = v - proj;
-	return proj + (index1 / index2) * ortho;
+	return Vec3::normalize(proj + (index1 / index2) * ortho);
 }
 
 float Vec3::angleBetween(Vec3 v1, Vec3 v2) {

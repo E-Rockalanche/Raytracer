@@ -1,4 +1,4 @@
-usemtl materials.mtl
+mtllib materials.mtl
 
 light 5 10 0   1 1 1
 light -5 10 0   1 0.1 0.1

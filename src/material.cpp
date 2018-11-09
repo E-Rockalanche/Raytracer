@@ -9,6 +9,7 @@ Material::Material() {
 	ambient_tex_handle = -1;
 	diffuse_tex_handle = -1;
 	specular_tex_handle = -1;
+	transmission_filter = Vec3(1, 1, 1);
 }
 
 Material::Material(Vec3 ambient, Vec3 diffuse, Vec3 specular, float specular_exponent)
@@ -19,6 +20,7 @@ Material::Material(Vec3 ambient, Vec3 diffuse, Vec3 specular, float specular_exp
 	ambient_tex_handle = -1;
 	diffuse_tex_handle = -1;
 	specular_tex_handle = -1;
+	transmission_filter = Vec3(1, 1, 1);
 }
 
 std::ostream& operator<<(std::ostream& out, const Material& mat) {
