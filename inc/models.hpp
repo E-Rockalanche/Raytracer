@@ -23,8 +23,6 @@ public:
 	Model(Vec3 position, int material_handle) : position(position),
 		material_handle(material_handle) {}
 
-	virtual ~Model() {}
-
 	virtual bool lineCollision(Vec3 origin, Vec3 direction,
 		CollisionData* collision_data) const = 0;
 
@@ -146,5 +144,19 @@ public:
 
 	std::vector<PolygonGroup> groups;
 };
+
+class Line : public Model {
+public:
+	Line() {}
+
+	Line(Vec3 position, Vec3 v, int material_handle);
+
+	virtual bool lineCollision(Vec3 origin, Vec3 direction,
+		CollisionData* collision_data) const = 0;
+
+	static bool closestPoints(Vec3 p0, Vec3 p, Vec3 q0, Vec3 q, float& t, float& s);
+
+	Vec3 v;
+}
 
 #endif
