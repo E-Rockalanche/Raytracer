@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include "models.hpp"
 #include "material_handler.hpp"
@@ -36,8 +35,13 @@ bool Plane::lineCollision(Vec3 origin, Vec3 direction, CollisionData* collision_
 			collision_data->normal = normal;
 			collision_data->distance = t;
 			collision_data->material_handle = material_handle;
+			collision_data->tex_x = Vec3::dotProduct(collision_data->collision_point - position, w)
+				/ Vec3::dotProduct(w, w);
+			collision_data->tex_y = Vec3::dotProduct(collision_data->collision_point - position, h)
+				/ Vec3::dotProduct(h, h);
 		}
 	}
+	
 	return collided;
 }
 

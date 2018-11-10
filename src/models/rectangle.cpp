@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include "models.hpp"
 #include "material_handler.hpp"
@@ -14,7 +13,7 @@ void Rectangle::setDimensions(Vec3 w, Vec3 h) {
 }
 
 bool Rectangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
-		Vec3 w, Vec3 h, float& t) {
+		Vec3 w, Vec3 h, float& t, float& wt, float& ht) {
 	bool intersection = false;
 	Vec3 normal = Vec3::normalize(Vec3::crossProduct(w, h));
 	if (Vec3::dotProduct(direction, normal) < 0) {
@@ -22,12 +21,11 @@ bool Rectangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
 			Vec3 point = origin + t * direction;
 
 			// check within width and height
-			float w_len = w.length();
-			float wt = Vec3::dotProduct(point - position, w) / (w_len * w_len);
+			wt = Vec3::dotProduct(point - position, w) / Vec3::dotProsuct(w, w);
 
 			if (wt > -0.00001 && wt < 1.00001) {
 				float h_len = h.length();
-				float ht = Vec3::dotProduct(point - position, h) / (h_len * h_len);
+				ht = Vec3::dotProduct(point - position, h) / Vec3::dotProduct(h, h);
 
 				intersection = (ht > -0.00001 && ht < 1.00001);
 			}
@@ -38,8 +36,8 @@ bool Rectangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
 
 bool Rectangle::lineCollision(Vec3 origin, Vec3 direction, CollisionData* collision_data) const {
 	bool collided = false;
-	float t;
-	if (Rectangle::lineIntersection(origin, direction, position, w, h, t)) {
+	float t, wt, ht;
+	if (Rectangle::lineIntersection(origin, direction, position, w, h, t, wt, ht)) {
 		collided = true;
 
 		if (collision_data) {
@@ -47,6 +45,8 @@ bool Rectangle::lineCollision(Vec3 origin, Vec3 direction, CollisionData* collis
 			collision_data->normal = normal;
 			collision_data->distance = t;
 			collision_data->material_handle = material_handle;
+			collision_data->tex_x = wt;
+			collision_data->tex_y = ht;
 		}
 	}
 	return collided;
