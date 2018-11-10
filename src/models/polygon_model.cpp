@@ -145,7 +145,6 @@ bool PolygonModel::loadObjectFile(std::string filename, std::string path) {
 				} else if (str == "vt") {
 					float u, v;
 					fin >> u >> v;
-					v = 1.0 - v;
 					tex_coords.push_back(u);
 					tex_coords.push_back(v);
 				} else if (str == "f") {

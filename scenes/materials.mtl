@@ -1,29 +1,29 @@
 newmtl glass
-Ka 0.1 0.1 0.1
-Kd 1 1 1
-Ks 1 1 1
-Ns 100
-Ni 1.3
-d 0.1
+Ka 0 0 0
+Kd 0.8 0.8 0.8
+Ks 0.8 0.8 0.8
+Ns 1000
+Ni 1.5
+d 0.3
 
 newmtl red
 Ka 0.1 0 0
 Kd 0.9 0.1 0.1
-Ks 0.6 0.6 0.6
-Ns 100
+Ks 0.5 0.5 0.5
+Ns 1000
 d 1
 
 newmtl green
 Ka 0 0.1 0
 Kd 0.1 0.9 0.1
-Ks 1 1 1
+Ks 0.6 0.6 0.6
 Ns 1000
 d 1
 
 newmtl blue
 Ka 0 0 0.1
 Kd 0.1 0.1 0.9
-Ks 0.3 0.3 0.3
+Ks 0.1 0.1 0.1
 Ns 10
 d 1
 
@@ -44,20 +44,27 @@ d 1
 newmtl yellow
 Ka 0.1 0.1 0
 Kd 0.9 0.9 0.1
-Ks 0.2 0.2 0.2
-Ns 100
+Ks 0.7 0.7 0.7
+Ns 1000
+d 1
+
+newmtl orange
+Ka 0.1 0.05 0
+Kd 1 0.5 0
+Ks 0.02 0.01 0
+Ns 10
 d 1
 
 newmtl white
 Ka 0.1 0.1 0.1
 Kd 0.9 0.9 0.9
-Ks 0.1 0.1 0.1
-Ns 10
+Ks 0 0 0
+Ns 1
 d 1
 
 newmtl black
 Ka 0 0 0
 Kd 0.1 0.1 0.1
-Ks 0.9 0.9 0.9
+Ks 0.2 0.2 0.2
 Ns 10
 d 1

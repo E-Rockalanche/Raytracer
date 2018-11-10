@@ -14,7 +14,7 @@ MODELS_OBJ = $(patsubst ./src/models/%.cpp, ./obj/models/%.o, $(MODELS_SRC))
 MAKE_OBJ = $(CXX) $(CFLAGS_NIX) $< -o $@
 MAKE_EXE = $(CXX) $(LFLAGS_NIX) $^ -o $@
 
-$(TARGET): obj/main.o obj/scene.o obj/vec3.o obj/material.o obj/material_handler.o \
+$(TARGET): obj/main.o obj/scene.o obj/vec3.o obj/vec4.o obj/material.o obj/material_handler.o \
 		obj/path.o obj/texture.o obj/texture_handler.o obj/stb_image.o $(MODELS_OBJ)
 	$(MAKE_EXE)
 
@@ -45,6 +45,9 @@ obj/scene.o: src/scene.cpp inc/scene.hpp inc/models.hpp inc/vec3.hpp
 	$(MAKE_OBJ)
 
 obj/vec3.o: src/vec3.cpp inc/vec3.hpp
+	$(MAKE_OBJ)
+
+obj/vec4.o: src/vec4.cpp inc/vec4.hpp
 	$(MAKE_OBJ)
 
 obj/path.o: src/path.cpp inc/path.hpp

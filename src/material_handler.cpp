@@ -1,4 +1,3 @@
-
 #include <string>
 #include <map>
 #include <vector>
@@ -26,10 +25,18 @@ int MaterialHandler::numMaterials() {
 	return materials.size();
 }
 
+bool loadTexture(std::string filename, int& dest_handle) {
+	int handle = TextureHandler::loadTextureFile(filename);
+	if (handle == -1) {
+		std::cout << "failed to load texture " << filename << '\n';
+	} else {
+		dest_handle = handle;
+	}
+	return (handle != -1);
+}
+
 bool MaterialHandler::loadMaterialFile(std::string filename, std::string path) {
 	parsePath(path + filename, path, filename);
-
-	std::cout << "loading material " << filename << '\n';
 
 	bool ok = false;
 	std::ifstream fin((path + filename).c_str());
@@ -62,23 +69,27 @@ bool MaterialHandler::loadMaterialFile(std::string filename, std::string path) {
 				} else if (str == "map_Ka") {
 					// ambient texture filename
 					fin >> cur_material->ambient_map_filename;
+					bool loaded = loadTexture(path + cur_material->ambient_map_filename,
+						cur_material->ambient_tex_handle);
+					if (!loaded) break;
 				} else if (str == "map_Kd") {
-					// ambient texture filename
-					std::cout << "map_Kd\n";
-
+					// diffuse texture filename
 					fin >> cur_material->diffuse_map_filename;
-					int handle = TextureHandler::loadTextureFile(path + cur_material->diffuse_map_filename);
-					if (handle == -1) {
-						std::cout << "failed to load texture " << cur_material->diffuse_map_filename << '\n';
-						break;
-					} else {
-						cur_material->diffuse_tex_handle = handle;
-					}
-
-					std::cout << "loaded texture\n";
+					bool loaded = loadTexture(path + cur_material->diffuse_map_filename,
+						cur_material->diffuse_tex_handle);
+					if (!loaded) break;
 				} else if (str == "map_Ks") {
-					// ambient texture filename
+					// specular texture filename
 					fin >> cur_material->specular_map_filename;
+					bool loaded = loadTexture(path + cur_material->specular_map_filename,
+						cur_material->specular_tex_handle);
+					if (!loaded) break;
+				} else if (str == "map_Kn") {
+					// specular texture filename
+					fin >> cur_material->normal_map_filename;
+					bool loaded = loadTexture(path + cur_material->normal_map_filename,
+						cur_material->normal_tex_handle);
+					if (!loaded) break;
 				} else if (str == "d") {
 					fin >> cur_material->alpha;
 				} else if (str == "Tf") {

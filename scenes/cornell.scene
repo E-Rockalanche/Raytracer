@@ -1,0 +1,24 @@
+# Cornell box for assignment 2
+# Eric Roberts
+
+mtllib materials.mtl
+mtllib spheres.mtl
+
+camera 0 10 20   0 10 -10   0 1 0   90
+
+attenuation 1000
+far 100
+
+model plane 0 0 0   1 0 0   0 0 -1   dark_mirror
+model plane 0 20 0   1 0 0   0 0 1   black
+model plane 0 0 -20   1 0 0   0 1 0   white
+model plane -10.0001 0 0   0 0 -1   0 1 0   orange
+model plane 10.0001 0 0   0 0 1   0 1 0   green
+
+model sphere -5 5 -15   5   earth
+model recprism 1 0 -16   4 0 -3   0 7 0   3 0 4   red
+model sphere 0.5 3 -8   3   glass
+
+light 0 10 10   2 2 2
+light 9 19 -19   1 1 0
+light -9 19 -19   0 1 1

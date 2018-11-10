@@ -1,7 +1,7 @@
 #ifndef TEXTURE_HPP
 #define TEXTURE_HPP
 
-#include "vec3.hpp"
+#include "vec4.hpp"
 
 class Texture {
 public:
@@ -17,8 +17,8 @@ public:
 	};
 
 	Texture(unsigned char* data, int width, int height, int channels);
-	Vec3 samplePixel(int x, int y) const;
-	Vec3 sampleColour(float x, float y, SampleMode sample_mode = LINEAR, EdgeMode edge_mode = REPEAT) const;
+	Vec4 samplePixel(int x, int y) const;
+	Vec4 sampleColour(float x, float y, SampleMode sample_mode = LINEAR, EdgeMode edge_mode = REPEAT) const;
 
 	int width, height, channels;
 	unsigned char* data;

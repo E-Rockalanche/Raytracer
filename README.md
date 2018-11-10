@@ -1,8 +1,19 @@
 # Raytracer
 
+**CSCI 405 Assignment2**
+
+**By Eric Roberts**
+
 Raytracer to render simple scenes.
 
 Capable of rendering spheres, planes, quads, triangles, and .obj models.
+
+To execute type one of:
+```
+./assignment2 ./scenes/cornell.scene
+./assignment2 ./scenes/planets.scene
+./assignment2 ./scenes/samus.scene
+```
 
 ## Scenes
 
@@ -80,14 +91,14 @@ ex)
 polygonmodel samus.obj
 ```
 
-### usemtl
+### mtllib
 
 specifies a .mtl file to use
 
 ex)
 ```
 # can define transparent and mirror like materials
-usemtl materials.mtl
+mtllib materials.mtl
 ```
 
 ### light
