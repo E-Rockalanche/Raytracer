@@ -1,19 +1,20 @@
 newmtl earth
-map_Kd earth.jpeg
-Ks 0 0 0
-Ka 0 0 0
+map_Kd images/earth_diffuse.jpeg
+map_Ks images/earth_specular.jpeg
+Ka 0 0 0.1
+Ns 100
 
 newmtl jupiter
-map_Kd jupiter.jpeg
+map_Kd images/jupiter.jpeg
 Ks 0 0 0
-Ka 0 0 0
+Ka 0.1 0 0
 
 newmtl wood_sphere
-map_Kd wood_sphere.jpeg
+map_Kd images/wood_sphere.jpeg
 Ks 0 0 0
-Ka 0 0 0
+Ka 0.1 0.1 0
 
 newmtl planet
-map_Kd planet.jpeg
+map_Kd images/planet.jpeg
 Ks 0 0 0
-Ka 0 0 0
+Ka 0.1 0.1 0
