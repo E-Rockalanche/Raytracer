@@ -53,7 +53,7 @@ bool Sphere::lineCollision(Vec3 origin, Vec3 direction,
 			const Material& mat = MaterialHandler::getMaterial(material_handle);
 			if (mat.diffuse_tex_handle >= 0) {
 				collision_data->tex_y = std::acos(Vec3::dotProduct(collision_data->normal,
-					Vec3(0, 1, 0))) / M_PI;
+					Vec3(0, -1, 0))) / M_PI;
 				float x_dot = Vec3::dotProduct(collision_data->normal, Vec3(1, 0, 0));
 				float z_dot = Vec3::dotProduct(collision_data->normal, Vec3(0, 0, 1));
 				collision_data->tex_x = (z_dot >= 0) ? (std::acos(x_dot) / (2*M_PI))

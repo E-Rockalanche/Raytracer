@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "vec4.hpp"
 
 Vec4::Vec4() {
@@ -42,4 +43,46 @@ float Vec4::operator[](int index) const {
 		default:
 			throw std::runtime_error("Vec4 index out of bounds: "+std::to_string(index));
 	}
+}
+
+Vec4& Vec4::operator+=(Vec4 other){
+	x += other.x;
+	y += other.y;
+	z += other.z;
+	w += other.w;
+	return *this;
+}
+
+Vec4& Vec4::operator-=(Vec4 other) {
+	x -= other.x;
+	y -= other.y;
+	z -= other.z;
+	w -= other.w;
+	return *this;
+}
+
+Vec4& Vec4::operator*=(Vec4 other) {
+	x *= other.x;
+	y *= other.y;
+	z *= other.z;
+	w *= other.w;
+	return *this;
+}
+
+Vec4 operator*(float scalar, Vec4 v) {
+	Vec4 result;
+	result.x = v.x * scalar;
+	result.y = v.y * scalar;
+	result.z = v.z * scalar;
+	result.w = v.w * scalar;
+	return result;
+}
+
+Vec4 operator/(Vec4 v, float scalar) {
+	Vec4 result;
+	result.x = v.x / scalar;
+	result.y = v.y / scalar;
+	result.z = v.z / scalar;
+	result.w = v.w / scalar;
+	return result;
 }

@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <cmath>
 
+#include "vec4.hpp"
 #include "scene.hpp"
 #include "material_handler.hpp"
 #include "texture.hpp"
@@ -138,19 +139,16 @@ void Scene::render(int width, int height, Pixel* buffer) {
 
 			Vec3 colour = castRay(camera_position, direction.normalize());
 
-			uchar red = std::min(colour.x, 1.0f) * 255;
-			uchar green = std::min(colour.y, 1.0f) * 255;
-			uchar blue = std::min(colour.z, 1.0f) * 255;
+			uchar red = std::min((int)(colour.x * 255.0), 255);
+			uchar green = std::min((int)(colour.y * 255.0), 255);
+			uchar blue = std::min((int)(colour.z * 255.0), 255);
+
 			buffer[x + (height-1-y) * width] = Pixel(red, green, blue);
 		}
 	}
 	
 	std::cout << "finished\n";
 }
-
-#define dout(message) std::cout << std::string(rec_depth, ' ') << message << '\n'
-
-// #define dout(message)
 
 Vec3 Scene::attenuate(const Vec3& colour, float distance) {
 	return colour / (1 + distance*distance/attenuation);
@@ -196,27 +194,40 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 
 			Vec3 diffuse = material.diffuse;
 			Vec3 ambient = material.ambient;
+			Vec3 specular = material.specular;
 			float alpha = material.alpha;
+
+			/*
+			get texture colours if applicable
+			*/
+			if (material.diffuse_tex_handle >= 0) {
+				const Texture& tex = TextureHandler::getTexture(material.diffuse_tex_handle);
+				Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
+					collision_data.tex_y, Texture::NEAREST);
+				diffuse = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
+				ambient = diffuse/10;
+				alpha *= tex_colour.w;
+			}
+
+			if (material.ambient_tex_handle >= 0) {
+				const Texture& tex = TextureHandler::getTexture(material.ambient_tex_handle);
+				Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
+					collision_data.tex_y, Texture::NEAREST);
+				ambient = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
+			}
+
+			if (material.specular_tex_handle >= 0) {
+				const Texture& tex = TextureHandler::getTexture(material.specular_tex_handle);
+				Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
+					collision_data.tex_y, Texture::NEAREST);
+				specular = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
+			}
 			
 			if (Vec3::dotProduct(collision_data.normal, direction) < 0) {
 				/*
-				get texture coords if in use
-				*/
-				Vec3 tex_colour;
-				bool use_texture = material.diffuse_tex_handle >= 0;
-				if (use_texture) {
-					const Texture& tex = TextureHandler::getTexture(material.diffuse_tex_handle);
-					Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
-						collision_data.tex_y, Texture::NEAREST);
-					diffuse = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
-					ambient = diffuse/10;
-					alpha *= tex_colour.w;
-				}
-				
-				/*
 				add illumination from lights
 				*/
-				if (material.alpha > 0) {
+				if (alpha > 0) {
 					for(int l = 0; l < (int)lights.size(); l++) {
 						Light* light = lights[l];
 						Vec3 light_colour = light->colour;
@@ -227,8 +238,7 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 						/*
 						ambient
 						*/
-						colour += material.alpha * light->colour
-							* (use_texture ? (tex_colour/10) : material.ambient);
+						colour += alpha * light->colour * ambient;
 						
 						bool can_see_light = true;
 						
@@ -257,14 +267,13 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 							
 							float diffuse_dot = Vec3::dotProduct(light_dir, collision_data.normal);
 							if (diffuse_dot > 0) {
-								colour += material.alpha * diffuse_dot * attenuated_light
-									* (use_texture ? tex_colour : material.diffuse);
+								colour += alpha * diffuse_dot * attenuated_light * diffuse;
 							}
 
 							float specular_dot = Vec3::dotProduct(specular_dir, direction);
 							if (specular_dot > 0) {
-								colour += material.alpha * std::pow(specular_dot, material.specular_exponent)
-									* attenuated_light * material.specular;
+								colour += alpha * std::pow(specular_dot, material.specular_exponent)
+									* attenuated_light * specular;
 							}
 						}
 					}
@@ -279,7 +288,7 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 					Vec3 reflect_colour = castRay(collision_data.collision_point + reflection/1000,
 						reflection, total_distance, refraction_index);
 					
-					colour += material.alpha * reflect_colour * material.specular;
+					colour += alpha * reflect_colour * specular;
 					
 					/*
 					// do we need diffuse reflected light?
@@ -287,11 +296,10 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 						* reflect_colour
 						* material.diffuse;
 					*/
-					
-				}
+				}// alpha > 0
 			}
 
-			if (material.alpha < 1) {
+			if (alpha < 1) {
 				/*
 				add illumination through model
 				*/
@@ -304,15 +312,11 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 
 					Vec3 refracted = Vec3::refract(direction, collision_data.normal,
 						from_index, to_index);
+
 					Vec3 through_colour = castRay(collision_data.collision_point
 						+ refracted/1000, refracted, total_distance, to_index);
 
-					if (going_in) {
-						colour += through_colour;
-					} else {
-						colour += (1 - material.alpha) * material.transmission_filter * through_colour;
-					}
-					// colour += (1 - material.alpha) * through_colour;
+					colour += (1 - alpha) * material.transmission_filter * through_colour;
 				}
 			}
 			
