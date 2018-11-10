@@ -20,15 +20,17 @@ public:
 	Vec3 specular;
 	Vec3 transmission_filter;
 
-	float specular_exponent; // spectral exponent (smoothness) (higher number acts more like mirror)
+	float specular_exponent;
 
 	std::string ambient_map_filename;
 	std::string diffuse_map_filename;
 	std::string specular_map_filename;
+	std::string normal_map_filename;
 
 	int ambient_tex_handle;
 	int diffuse_tex_handle;
 	int specular_tex_handle;
+	int normal_tex_handle;
 
 	float alpha;
 	float refraction_index;
