@@ -14,8 +14,8 @@ Texture::Texture(unsigned char* data, int width, int height, int channels)
 	if (height == 0) {
 		throw std::runtime_error("texture height is 0");
 	}
-	if (channels < 3) {
-		throw std::runtime_error("texture channels is less than 3");
+	if (channels <= 0) {
+		throw std::runtime_error("texture channels is less than 1");
 	}
 }
 
@@ -26,8 +26,31 @@ Vec4 Texture::samplePixel(int x, int y) const {
 		throw std::runtime_error("texture sample position out of bounds");
 	}
 	unsigned char* p = data + (x + (height - y - 1)*width) * channels;
-	float alpha = (channels >= 4) ? (p[3]/255.0) : (1.0);
-	return Vec4(p[0]/255.0, p[1]/255.0, p[2]/255.0, alpha);
+	float r, g, b, a;
+	switch(channels) {
+		case 1:
+			r = g = b = p[0]/255.0;
+			a = 1.0;
+			break;
+		case 2:
+			r = p[0]/255.0;
+			g = p[1]/255.0;
+			b = a = 1.0;
+			break;
+		case 3:
+			r = p[0]/255.0;
+			g = p[1]/255.0;
+			b = p[2]/255.0;
+			a = 1.0;
+			break;
+		case 4:
+			r = p[0]/255.0;
+			g = p[1]/255.0;
+			b = p[2]/255.0;
+			a = p[3]/255.0;
+			break;
+	}
+	return Vec4(r, g, b, a);
 }
 
 Vec4 Texture::sampleColour(float x, float y, Texture::SampleMode sample_mode, Texture::EdgeMode edge_mode) const {

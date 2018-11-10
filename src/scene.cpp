@@ -200,27 +200,26 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 			/*
 			get texture colours if applicable
 			*/
-			if (material.diffuse_tex_handle >= 0) {
-				const Texture& tex = TextureHandler::getTexture(material.diffuse_tex_handle);
-				Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
-					collision_data.tex_y, Texture::NEAREST);
-				diffuse = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
-				ambient = diffuse/10;
-				alpha *= tex_colour.w;
-			}
-
 			if (material.ambient_tex_handle >= 0) {
 				const Texture& tex = TextureHandler::getTexture(material.ambient_tex_handle);
 				Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
 					collision_data.tex_y, Texture::NEAREST);
-				ambient = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
+				ambient *= Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
+			}
+
+			if (material.diffuse_tex_handle >= 0) {
+				const Texture& tex = TextureHandler::getTexture(material.diffuse_tex_handle);
+				Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
+					collision_data.tex_y, Texture::NEAREST);
+				diffuse *= Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
+				alpha *= tex_colour.w;
 			}
 
 			if (material.specular_tex_handle >= 0) {
 				const Texture& tex = TextureHandler::getTexture(material.specular_tex_handle);
 				Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
 					collision_data.tex_y, Texture::NEAREST);
-				specular = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
+				specular *= Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
 			}
 			
 			if (Vec3::dotProduct(collision_data.normal, direction) < 0) {
