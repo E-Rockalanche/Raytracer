@@ -74,10 +74,6 @@ int main(int argc, char* argv[]) {
 		if (!ok) {
 			std::cout << "failed to load scene\n";
 			return 1;
-		} else {
-			std::cout << "models: " << scene.models.size() << '\n';
-			std::cout << "lights: " << scene.lights.size() << '\n';
-			std::cout << "materials: " << MaterialHandler::numMaterials() << '\n';
 		}
 	}
 

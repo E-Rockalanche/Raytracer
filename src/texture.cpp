@@ -1,6 +1,6 @@
 #include <stdexcept>
 #include <iostream>
-#include "vec3.hpp"
+#include "vec4.hpp"
 #include "texture.hpp"
 
 Texture::Texture(unsigned char* data, int width, int height, int channels)
@@ -21,16 +21,17 @@ Texture::Texture(unsigned char* data, int width, int height, int channels)
 
 #define clamp(a, low, high) (((a) < (low)) ? (low) : (((a) > (high)) ? (high) : (a)));
 
-Vec3 Texture::samplePixel(int x, int y) const {
+Vec4 Texture::samplePixel(int x, int y) const {
 	if (x < 0 || y < 0 || x >= width || y >= height) {
 		throw std::runtime_error("texture sample position out of bounds");
 	}
 	unsigned char* p = data + (x + (height - y - 1)*width) * channels;
-	return Vec3(p[0]/255.0, p[1]/255.0, p[2]/255.0);
+	float alpha = (channels >= 4) ? (p[3]/255.0) : (1.0);
+	return Vec4(p[0]/255.0, p[1]/255.0, p[2]/255.0, alpha);
 }
 
-Vec3 Texture::sampleColour(float x, float y, Texture::SampleMode sample_mode, Texture::EdgeMode edge_mode) const {
-	Vec3 colour;
+Vec4 Texture::sampleColour(float x, float y, Texture::SampleMode sample_mode, Texture::EdgeMode edge_mode) const {
+	Vec4 colour;
 
 	switch(edge_mode) {
 		default:

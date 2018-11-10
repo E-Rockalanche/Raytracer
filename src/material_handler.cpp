@@ -1,4 +1,3 @@
-
 #include <string>
 #include <map>
 #include <vector>
@@ -28,8 +27,6 @@ int MaterialHandler::numMaterials() {
 
 bool MaterialHandler::loadMaterialFile(std::string filename, std::string path) {
 	parsePath(path + filename, path, filename);
-
-	std::cout << "loading material " << filename << '\n';
 
 	bool ok = false;
 	std::ifstream fin((path + filename).c_str());
@@ -64,8 +61,6 @@ bool MaterialHandler::loadMaterialFile(std::string filename, std::string path) {
 					fin >> cur_material->ambient_map_filename;
 				} else if (str == "map_Kd") {
 					// ambient texture filename
-					std::cout << "map_Kd\n";
-
 					fin >> cur_material->diffuse_map_filename;
 					int handle = TextureHandler::loadTextureFile(path + cur_material->diffuse_map_filename);
 					if (handle == -1) {
@@ -74,8 +69,6 @@ bool MaterialHandler::loadMaterialFile(std::string filename, std::string path) {
 					} else {
 						cur_material->diffuse_tex_handle = handle;
 					}
-
-					std::cout << "loaded texture\n";
 				} else if (str == "map_Ks") {
 					// ambient texture filename
 					fin >> cur_material->specular_map_filename;

@@ -10,7 +10,6 @@ std::map<std::string, int> TextureHandler::name_map;
 std::vector<Texture> TextureHandler::textures;
 
 int TextureHandler::loadTextureFile(std::string filename) {
-	std::cout << "loading texture " << filename << '\n';
 	int handle = getHandle(filename);
 	if (handle == -1) {
 		int width, height, channels;
