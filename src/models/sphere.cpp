@@ -1,6 +1,6 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include "models.hpp"
+#include "sphere.hpp"
 #include "material_handler.hpp"
 
 #define dout(message)

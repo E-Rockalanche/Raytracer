@@ -1,4 +1,3 @@
-OS := windows
 TARGET := assignment2
 CXX := g++
 
@@ -10,7 +9,7 @@ else
 	CLEAN := rm ./obj/*.o ./obj/models/*.o $(TARGET)
 endif
 
-CFLAGS := -c -Wall -Wextra -std=c++17 -I./inc
+CFLAGS := -c -Wall -Wextra -std=c++17 -I./inc -I./inc/models
 
 MODELS_SRC = $(wildcard ./src/models/*.cpp)
 MODELS_OBJ = $(patsubst ./src/models/%.cpp, ./obj/models/%.o, $(MODELS_SRC))
@@ -24,13 +23,10 @@ $(TARGET): obj/main.o obj/scene.o obj/vec3.o obj/vec4.o obj/material.o obj/mater
 
 models: $(MODELS_OBJ)
 
-obj/models/%.o: src/models/%.cpp inc/vec3.hpp inc/models.hpp
+obj/models/%.o: src/models/%.cpp inc/models/%.hpp inc/vec3.hpp
 	$(MAKE_OBJ)
 
-obj/main.o: src/main.cpp inc/models.hpp inc/scene.hpp
-	$(MAKE_OBJ)
-
-obj/test.o: src/test.cpp inc/models.hpp inc/scene.hpp
+obj/main.o: src/main.cpp inc/models/model.hpp inc/scene.hpp
 	$(MAKE_OBJ)
 
 obj/material_handler.o: src/material_handler.cpp inc/material_handler.hpp inc/material.hpp
@@ -45,7 +41,7 @@ obj/material.o: src/material.cpp inc/material.hpp
 obj/texture.o: src/texture.cpp inc/texture.hpp
 	$(MAKE_OBJ)
 
-obj/scene.o: src/scene.cpp inc/scene.hpp inc/models.hpp inc/vec3.hpp
+obj/scene.o: src/scene.cpp inc/scene.hpp inc/models/model.hpp inc/vec3.hpp
 	$(MAKE_OBJ)
 
 obj/vec3.o: src/vec3.cpp inc/vec3.hpp

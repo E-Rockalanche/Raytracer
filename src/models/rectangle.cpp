@@ -1,5 +1,5 @@
 #include <iostream>
-#include "models.hpp"
+#include "rectangle.hpp"
 #include "material_handler.hpp"
 
 Rectangle::Rectangle(Vec3 position, Vec3 w, Vec3 h, int material_handle)

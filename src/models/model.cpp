@@ -1,7 +1,11 @@
-
 #include <istream>
 #include <iostream>
-#include "models.hpp"
+#include "model.hpp"
+#include "sphere.hpp"
+#include "plane.hpp"
+#include "rectangle.hpp"
+#include "triangle.hpp"
+#include "recprism.hpp"
 
 std::istream& operator>>(std::istream& in, Model*& model) {
 	std::string type;

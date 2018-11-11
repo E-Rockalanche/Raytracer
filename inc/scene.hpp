@@ -2,7 +2,7 @@
 #define SCENE_HPP
 
 #include <vector>
-#include "models.hpp"
+#include "model.hpp"
 #include "light.hpp"
 #include "pixel.hpp"
 #include "vec3.hpp"

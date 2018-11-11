@@ -2,7 +2,7 @@
 #include <exception>
 #include <fstream>
 
-#include "models.hpp"
+#include "model.hpp"
 #include "material.hpp"
 #include "scene.hpp"
 #include "vec3.hpp"

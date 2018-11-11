@@ -1,9 +1,9 @@
-
 #include <cfloat>
 #include <fstream>
 #include <string>
 #include <iostream>
-#include "models.hpp"
+#include "polygon_model.hpp"
+#include "triangle.hpp"
 #include "material_handler.hpp"
 #include "path.hpp"
 
