@@ -1,8 +1,10 @@
 #include <stdexcept>
 #include <iostream>
-#include <algorithm>
+#include <cmath>
 #include "vec4.hpp"
 #include "texture.hpp"
+
+#define clamp(value, low, high) std::max(low, std::min(high, value))
 
 Texture::Texture(unsigned char* data, int width, int height, int channels)
 		: width(width), height(height), channels(channels), data(data) {
@@ -77,8 +79,8 @@ Vec4 Texture::sampleColour(float x, float y, Texture::SampleMode sample_mode, Te
 			break;
 
 		case CLAMP:
-			x = std::clamp(x, 0.0, 1.0);
-			y = std::clamp(y, 0.0, 1.0);
+			x = clamp(x, 0.0f, 1.0f);
+			y = clamp(y, 0.0f, 1.0f);
 			break;
 	}
 
@@ -91,13 +93,13 @@ Vec4 Texture::sampleColour(float x, float y, Texture::SampleMode sample_mode, Te
 				xl = x * (width-1) - 0.5;
 				yt = y * (height-1) - 0.5;
 
-				xl = std::clamp(xl, 0, width-1);
-				xr = std::clamp(xl+1, 0, width-1);
-				yt = std::clamp(yt, 0, height-1);
-				yb = std::clamp(yt+1, 0, height-1);
+				xl = clamp(xl, 0, width-1);
+				xr = clamp(xl+1, 0, width-1);
+				yt = clamp(yt, 0, height-1);
+				yb = clamp(yt+1, 0, height-1);
 
 				float wt = x * (width-1) - xl;
-				float ht = h * (height-1) - yt;
+				float ht = y * (height-1) - yt;
 
 				Vec4 col_tl, col_tr, col_bl, col_br;
 				col_tl = samplePixel(xl, yt);
@@ -113,8 +115,8 @@ Vec4 Texture::sampleColour(float x, float y, Texture::SampleMode sample_mode, Te
 
 		case NEAREST:
 			{
-				int px = std::clamp((int)(x * width), 0, width-1);
-				int py = std::clamp((int)(y * height), 0, height-1);
+				int px = clamp((int)(x * width), 0, width-1);
+				int py = clamp((int)(y * height), 0, height-1);
 				colour = samplePixel(px, py);
 			}
 			break;

@@ -2,17 +2,17 @@ TARGET := assignment2
 CLEAN := rm ./obj/*.o ./obj/models/*.o $(TARGET)
 CXX := g++
 
-CFLAGS_NIX := -c -Wall -Wextra -std=c++11 -I./inc
-CFLAGS_WIN := -c -Wall -Wextra -std=c++11 -I".\inc" -I"C:\MinGW\freeglut\include"
+CFLAGS_NIX := -c -Wall -Wextra -std=c++17 -I./inc
+CFLAGS_WIN := -c -Wall -Wextra -std=c++17 -I".\inc"
 
 LFLAGS_NIX := -lm -lGL -lGLU -lglut
-LFLAGS_WIN := -lm -L"C:\MinGW\freeglut\lib" -lfreeglut -lopengl32 -lglu32 -Wl,--subsystem,windows
+LFLAGS_WIN := -static -lm -lglut32cu -lglu32 -lopengl32
 
 MODELS_SRC = $(wildcard ./src/models/*.cpp)
 MODELS_OBJ = $(patsubst ./src/models/%.cpp, ./obj/models/%.o, $(MODELS_SRC))
 
-MAKE_OBJ = $(CXX) $(CFLAGS_NIX) $< -o $@
-MAKE_EXE = $(CXX) $(LFLAGS_NIX) $^ -o $@
+MAKE_OBJ = $(CXX) $< -o $@ $(CFLAGS_WIN) 
+MAKE_EXE = $(CXX) $^ -o $@ $(LFLAGS_WIN)
 
 $(TARGET): obj/main.o obj/scene.o obj/vec3.o obj/vec4.o obj/material.o obj/material_handler.o \
 		obj/path.o obj/texture.o obj/texture_handler.o obj/stb_image.o $(MODELS_OBJ)

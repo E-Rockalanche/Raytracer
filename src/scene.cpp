@@ -5,7 +5,6 @@
 #include <ctime>
 #include <fstream>
 #include <stdexcept>
-#include <cmath>
 
 #include "vec4.hpp"
 #include "scene.hpp"

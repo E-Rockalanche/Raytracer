@@ -21,10 +21,9 @@ bool Rectangle::lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
 			Vec3 point = origin + t * direction;
 
 			// check within width and height
-			wt = Vec3::dotProduct(point - position, w) / Vec3::dotProsuct(w, w);
+			wt = Vec3::dotProduct(point - position, w) / Vec3::dotProduct(w, w);
 
 			if (wt > -0.00001 && wt < 1.00001) {
-				float h_len = h.length();
 				ht = Vec3::dotProduct(point - position, h) / Vec3::dotProduct(h, h);
 
 				intersection = (ht > -0.00001 && ht < 1.00001);

@@ -6,8 +6,6 @@
 #include "vec3.hpp"
 #include "material.hpp"
 
-#define assignPointer(variable, value) { if ((variable) != NULL) *(variable) = (value); }
-
 struct CollisionData {
 	Vec3 collision_point;
 	Vec3 normal;
@@ -98,7 +96,7 @@ public:
 		CollisionData* collision_data) const;
 
 	static bool lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
-		Vec3 w, Vec3 h, float& t);
+		Vec3 w, Vec3 h, float& t, float& wt, float& ht);
 
 	friend std::istream& operator>>(std::istream& in, Rectangle& rectangle);
 };

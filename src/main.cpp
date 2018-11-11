@@ -1,7 +1,3 @@
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include "GL/glut.h"
-
 #include <iostream>
 #include <exception>
 #include <fstream>
@@ -14,6 +10,10 @@
 #include "material_handler.hpp"
 #include "texture_handler.hpp"
 #include "path.hpp"
+
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include "GL/glut.h"
 
 #define SCREEN_WIDTH 512
 #define SCREEN_HEIGHT 512
