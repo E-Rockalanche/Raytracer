@@ -1,5 +1,5 @@
 #include <iostream>
-#include "models.hpp"
+#include "plane.hpp"
 #include "material_handler.hpp"
 
 Plane::Plane(Vec3 position, Vec3 w, Vec3 h, int material_handle)

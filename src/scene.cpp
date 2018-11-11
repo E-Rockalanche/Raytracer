@@ -5,6 +5,8 @@
 #include <ctime>
 #include <fstream>
 #include <stdexcept>
+
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 #include "vec4.hpp"
@@ -12,9 +14,7 @@
 #include "material_handler.hpp"
 #include "texture.hpp"
 #include "texture_handler.hpp"
-
-#define _USE_MATH_DEFINES
-#include <cmath>
+#include "polygon_model.hpp"
 
 Scene::Scene() {
 	camera_at = Vec3(0, 0, -1);
@@ -203,23 +203,23 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 			if (material.ambient_tex_handle >= 0) {
 				const Texture& tex = TextureHandler::getTexture(material.ambient_tex_handle);
 				Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
-					collision_data.tex_y, Texture::NEAREST);
-				ambient *= Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
+					collision_data.tex_y);
+				ambient = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
 			}
 
 			if (material.diffuse_tex_handle >= 0) {
 				const Texture& tex = TextureHandler::getTexture(material.diffuse_tex_handle);
 				Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
-					collision_data.tex_y, Texture::NEAREST);
-				diffuse *= Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
+					collision_data.tex_y);
+				diffuse = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
 				alpha *= tex_colour.w;
 			}
 
 			if (material.specular_tex_handle >= 0) {
 				const Texture& tex = TextureHandler::getTexture(material.specular_tex_handle);
 				Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
-					collision_data.tex_y, Texture::NEAREST);
-				specular *= Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
+					collision_data.tex_y);
+				specular = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
 			}
 			
 			if (Vec3::dotProduct(collision_data.normal, direction) < 0) {

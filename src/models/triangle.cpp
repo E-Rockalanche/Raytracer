@@ -1,5 +1,5 @@
 #include <iostream>
-#include "models.hpp"
+#include "triangle.hpp"
 #include "material_handler.hpp"
 
 Triangle::Triangle(Vec3 v1, Vec3 v2, Vec3 v3, int material_handle)

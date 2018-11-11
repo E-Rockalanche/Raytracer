@@ -86,3 +86,21 @@ Vec4 operator/(Vec4 v, float scalar) {
 	result.w = v.w / scalar;
 	return result;
 }
+
+Vec4 operator+(Vec4 v1, Vec4 v2) {
+	Vec4 result;
+	result.x = v1.x + v2.x;
+	result.y = v1.y + v2.y;
+	result.z = v1.z + v2.z;
+	result.w = v1.w + v2.w;
+	return result;
+}
+
+Vec4 operator-(Vec4 v1, Vec4 v2) {
+	Vec4 result;
+	result.x = v1.x - v2.x;
+	result.y = v1.y - v2.y;
+	result.z = v1.z - v2.z;
+	result.w = v1.w - v2.w;
+	return result;
+}

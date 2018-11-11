@@ -1,18 +1,21 @@
 TARGET := assignment2
-CLEAN := rm ./obj/*.o ./obj/models/*.o $(TARGET)
 CXX := g++
 
-CFLAGS_NIX := -c -Wall -Wextra -std=c++11 -I./inc
-CFLAGS_WIN := -c -Wall -Wextra -std=c++11 -I".\inc" -I"C:\MinGW\freeglut\include"
+ifeq ($(OS), windows)
+	LFLAGS := -static -lm -lglut32cu -lglu32 -lopengl32
+	CLEAN := del .\obj\*.o .\obj\models\*.o $(TARGET)
+else
+	LFLAGS := -lm -lGL -lGLU -lglut
+	CLEAN := rm ./obj/*.o ./obj/models/*.o $(TARGET)
+endif
 
-LFLAGS_NIX := -lm -lGL -lGLU -lglut
-LFLAGS_WIN := -lm -L"C:\MinGW\freeglut\lib" -lfreeglut -lopengl32 -lglu32 -Wl,--subsystem,windows
+CFLAGS := -c -Wall -Wextra -std=c++17 -I./inc -I./inc/models
 
 MODELS_SRC = $(wildcard ./src/models/*.cpp)
 MODELS_OBJ = $(patsubst ./src/models/%.cpp, ./obj/models/%.o, $(MODELS_SRC))
 
-MAKE_OBJ = $(CXX) $(CFLAGS_NIX) $< -o $@
-MAKE_EXE = $(CXX) $(LFLAGS_NIX) $^ -o $@
+MAKE_OBJ = $(CXX) $< -o $@ $(CFLAGS)
+MAKE_EXE = $(CXX) $^ -o $@ $(LFLAGS)
 
 $(TARGET): obj/main.o obj/scene.o obj/vec3.o obj/vec4.o obj/material.o obj/material_handler.o \
 		obj/path.o obj/texture.o obj/texture_handler.o obj/stb_image.o $(MODELS_OBJ)
@@ -20,13 +23,10 @@ $(TARGET): obj/main.o obj/scene.o obj/vec3.o obj/vec4.o obj/material.o obj/mater
 
 models: $(MODELS_OBJ)
 
-obj/models/%.o: src/models/%.cpp inc/vec3.hpp inc/models.hpp
+obj/models/%.o: src/models/%.cpp inc/models/%.hpp inc/vec3.hpp
 	$(MAKE_OBJ)
 
-obj/main.o: src/main.cpp inc/models.hpp inc/scene.hpp
-	$(MAKE_OBJ)
-
-obj/test.o: src/test.cpp inc/models.hpp inc/scene.hpp
+obj/main.o: src/main.cpp inc/models/model.hpp inc/scene.hpp
 	$(MAKE_OBJ)
 
 obj/material_handler.o: src/material_handler.cpp inc/material_handler.hpp inc/material.hpp
@@ -41,7 +41,7 @@ obj/material.o: src/material.cpp inc/material.hpp
 obj/texture.o: src/texture.cpp inc/texture.hpp
 	$(MAKE_OBJ)
 
-obj/scene.o: src/scene.cpp inc/scene.hpp inc/models.hpp inc/vec3.hpp
+obj/scene.o: src/scene.cpp inc/scene.hpp inc/models/model.hpp inc/vec3.hpp
 	$(MAKE_OBJ)
 
 obj/vec3.o: src/vec3.cpp inc/vec3.hpp

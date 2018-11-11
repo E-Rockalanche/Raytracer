@@ -14,6 +14,8 @@ public:
 	Vec4& operator/=(float scalar);
 	friend Vec4 operator*(float scalar, Vec4 v);
 	friend Vec4 operator/(Vec4 v, float scalar);
+	friend Vec4 operator+(Vec4 v1, Vec4 v2);
+	friend Vec4 operator-(Vec4 v1, Vec4 v2);
 
 	float x, y, z, w;
 };

@@ -1,5 +1,5 @@
 #include <cfloat>
-#include "models.hpp"
+#include "recprism.hpp"
 #include "material_handler.hpp"
 
 RecPrism::RecPrism(Vec3 position, Vec3 w, Vec3 h, Vec3 d, int material_handle)
