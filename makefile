@@ -1,18 +1,22 @@
+OS := windows
 TARGET := assignment2
-CLEAN := rm ./obj/*.o ./obj/models/*.o $(TARGET)
 CXX := g++
 
-CFLAGS_NIX := -c -Wall -Wextra -std=c++17 -I./inc
-CFLAGS_WIN := -c -Wall -Wextra -std=c++17 -I".\inc"
+ifeq ($(OS), windows)
+	LFLAGS := -static -lm -lglut32cu -lglu32 -lopengl32
+	CLEAN := del .\obj\*.o .\obj\models\*.o $(TARGET)
+else
+	LFLAGS := -lm -lGL -lGLU -lglut
+	CLEAN := rm ./obj/*.o ./obj/models/*.o $(TARGET)
+endif
 
-LFLAGS_NIX := -lm -lGL -lGLU -lglut
-LFLAGS_WIN := -static -lm -lglut32cu -lglu32 -lopengl32
+CFLAGS := -c -Wall -Wextra -std=c++17 -I./inc
 
 MODELS_SRC = $(wildcard ./src/models/*.cpp)
 MODELS_OBJ = $(patsubst ./src/models/%.cpp, ./obj/models/%.o, $(MODELS_SRC))
 
-MAKE_OBJ = $(CXX) $< -o $@ $(CFLAGS_WIN) 
-MAKE_EXE = $(CXX) $^ -o $@ $(LFLAGS_WIN)
+MAKE_OBJ = $(CXX) $< -o $@ $(CFLAGS)
+MAKE_EXE = $(CXX) $^ -o $@ $(LFLAGS)
 
 $(TARGET): obj/main.o obj/scene.o obj/vec3.o obj/vec4.o obj/material.o obj/material_handler.o \
 		obj/path.o obj/texture.o obj/texture_handler.o obj/stb_image.o $(MODELS_OBJ)
