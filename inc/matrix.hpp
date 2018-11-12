@@ -1,6 +1,9 @@
 #ifndef MATRIX_HPP
 #define MATRIX_HPP
 
+#include "vec3.hpp"
+#include "vec4.hpp"
+
 class Matrix {
 public:
 	static const int SIZE = 4;
@@ -28,6 +31,11 @@ public:
 	friend Matrix operator*(const Matrix& m1, const Matrix& m2);
 	friend Matrix operator+(const Matrix& m1, const Matrix& m2);
 	friend Matrix operator-(const Matrix& m1, const Matrix& m2);
+
+	friend Vec3 operator*(const Matrix& matrix, const Vec3& v);
+	friend Vec3 operator*(const Vec3& v, const Matrix& matrix);
+	friend Vec4 operator*(const Matrix& matrix, const Vec4& v);
+	friend Vec4 operator*(const Vec4& v, const Matrix& matrix);
 
 private:
 	float data[SIZE * SIZE];

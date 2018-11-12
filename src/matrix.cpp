@@ -121,3 +121,43 @@ Matrix operator-(const Matrix& m1, const Matrix& m2) {
 	}
 	return result;
 }
+
+Vec3 operator*(const Matrix& matrix, const Vec3& v) {
+	Vec3 result;
+	for(int row = 0; row < 3; row++) {
+		for(int i = 0; i < 3; i++) {
+			result[row] += matrix[row*Matrix::SIZE + i] * v[i];
+		}
+	}
+	return result;
+}
+
+Vec3 operator*(const Vec3& v, const Matrix& matrix) {
+	Vec3 result;
+	for(int col = 0; col < 3; col++) {
+		for(int i = 0; i < 3; i++) {
+			result[col] += v[col] * matrix[i*Matrix::SIZE + col];
+		}
+	}
+	return result;
+}
+
+Vec4 operator*(const Matrix& matrix, const Vec4& v) {
+	Vec4 result;
+	for(int row = 0; row < 4; row++) {
+		for(int i = 0; i < 4; i++) {
+			result[row] += matrix[row*Matrix::SIZE + i] * v[i];
+		}
+	}
+	return result;
+}
+
+Vec4 operator*(const Vec4& v, const Matrix& matrix) {
+	Vec4 result;
+	for(int col = 0; col < 4; col++) {
+		for(int i = 0; i < 4; i++) {
+			result[col] += v[col] * matrix[i*Matrix::SIZE + col];
+		}
+	}
+	return result;
+}
