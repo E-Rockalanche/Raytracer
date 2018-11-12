@@ -51,6 +51,9 @@ obj/vec3.o: src/vec3.cpp inc/vec3.hpp
 obj/vec4.o: src/vec4.cpp inc/vec4.hpp
 	$(MAKE_OBJ)
 
+obj/matrix.o: src/matrix.cpp inc/matrix.hpp
+	$(MAKE_OBJ)
+
 obj/path.o: src/path.cpp inc/path.hpp
 	$(MAKE_OBJ)
 
