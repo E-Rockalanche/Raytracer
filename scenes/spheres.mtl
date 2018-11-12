@@ -1,28 +1,28 @@
 newmtl earth
 map_Kd images/earth_diffuse.jpeg
 map_Ks images/earth_specular.jpeg
-Ka 0 0 0.1
+Ka 0 0 0
 Kd 1 1 1
 Ks 1 1 1
 Ns 100
 
 newmtl jupiter
 map_Kd images/jupiter.jpeg
-Ka 0.1 0 0
+Ka 0 0 0
 Kd 1 1 1
 Ks 1 1 1
 Ns 100
 
 newmtl wood_sphere
 map_Kd images/wood_sphere.jpeg
-Ka 0.1 0.1 0
+Ka 0 0 0
 Kd 1 1 1
 Ks 1 1 1
 Ns 100
 
 newmtl planet
 map_Kd images/planet.jpeg
-Ka 0.1 0.1 0
+Ka 0 0 0
 Kd 1 1 1
 Ks 1 1 1
 Ns 100

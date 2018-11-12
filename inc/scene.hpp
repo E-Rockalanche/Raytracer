@@ -15,6 +15,7 @@ public:
 	void addLight(Light* light);
 	bool loadScene(std::string filename, std::string path);
 	void render(int width, int height, Pixel* buffer);
+	void renderPixel(int width, int height, Pixel* buffer, int x, int y);
 
 	Vec3 camera_position;
 	Vec3 camera_at;

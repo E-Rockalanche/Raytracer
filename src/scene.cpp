@@ -128,26 +128,29 @@ void Scene::render(int width, int height, Pixel* buffer) {
 				t1 = t2;
 				std::cout << 100.0 * (x + y*width) / (width*height) << "%\n";
 			}
-			
-			float x_angle = ((float)x/(width-1) - 0.5) * fov/2 * M_PI/180;
-			float y_fov = fov * height / width;
-			float y_angle = (0.5 - (float)y/(height-1)) * y_fov/2 * M_PI/180;
-
-			Vec3 direction = camera_at
-				+ std::tan(x_angle) * camera_right
-				+ std::tan(y_angle) * camera_up;
-
-			Vec3 colour = castRay(camera_position, direction.normalize());
-
-			uchar red = std::min((int)(colour.x * 255.0), 255);
-			uchar green = std::min((int)(colour.y * 255.0), 255);
-			uchar blue = std::min((int)(colour.z * 255.0), 255);
-
-			buffer[x + (height-1-y) * width] = Pixel(red, green, blue);
+			renderPixel(width, height, buffer, x, y);
 		}
 	}
 	
 	std::cout << "finished\n";
+}
+
+void Scene::renderPixel(int width, int height, Pixel* buffer, int x, int y) {
+	float x_angle = ((float)x/(width-1) - 0.5) * fov/2 * M_PI/180;
+	float y_fov = fov * height / width;
+	float y_angle = (0.5 - (float)y/(height-1)) * y_fov/2 * M_PI/180;
+
+	Vec3 direction = camera_at
+		+ std::tan(x_angle) * camera_right
+		+ std::tan(y_angle) * camera_up;
+
+	Vec3 colour = castRay(camera_position, direction.normalize());
+
+	uchar red = std::min((int)(colour.x * 255.0), 255);
+	uchar green = std::min((int)(colour.y * 255.0), 255);
+	uchar blue = std::min((int)(colour.z * 255.0), 255);
+
+	buffer[x + (height-1-y) * width] = Pixel(red, green, blue);
 }
 
 Vec3 Scene::attenuate(const Vec3& colour, float distance) {
@@ -203,14 +206,14 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 			if (material.ambient_tex_handle >= 0) {
 				const Texture& tex = TextureHandler::getTexture(material.ambient_tex_handle);
 				Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
-					collision_data.tex_y);
+					collision_data.tex_y, Texture::NEAREST);
 				ambient = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
 			}
 
 			if (material.diffuse_tex_handle >= 0) {
 				const Texture& tex = TextureHandler::getTexture(material.diffuse_tex_handle);
 				Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
-					collision_data.tex_y);
+					collision_data.tex_y, Texture::NEAREST);
 				diffuse = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
 				alpha *= tex_colour.w;
 			}
@@ -218,7 +221,7 @@ Vec3 Scene::castRay(Vec3 origin, Vec3 direction, float total_distance, float ref
 			if (material.specular_tex_handle >= 0) {
 				const Texture& tex = TextureHandler::getTexture(material.specular_tex_handle);
 				Vec4 tex_colour = tex.sampleColour(collision_data.tex_x,
-					collision_data.tex_y);
+					collision_data.tex_y, Texture::NEAREST);
 				specular = Vec3(tex_colour.x, tex_colour.y, tex_colour.z);
 			}
 			

@@ -45,7 +45,7 @@ float Vec4::operator[](int index) const {
 	}
 }
 
-Vec4& Vec4::operator+=(Vec4 other){
+Vec4& Vec4::operator+=(const Vec4& other){
 	x += other.x;
 	y += other.y;
 	z += other.z;
@@ -53,7 +53,7 @@ Vec4& Vec4::operator+=(Vec4 other){
 	return *this;
 }
 
-Vec4& Vec4::operator-=(Vec4 other) {
+Vec4& Vec4::operator-=(const Vec4& other) {
 	x -= other.x;
 	y -= other.y;
 	z -= other.z;
@@ -61,7 +61,7 @@ Vec4& Vec4::operator-=(Vec4 other) {
 	return *this;
 }
 
-Vec4& Vec4::operator*=(Vec4 other) {
+Vec4& Vec4::operator*=(const Vec4& other) {
 	x *= other.x;
 	y *= other.y;
 	z *= other.z;
@@ -69,7 +69,7 @@ Vec4& Vec4::operator*=(Vec4 other) {
 	return *this;
 }
 
-Vec4 operator*(float scalar, Vec4 v) {
+Vec4 operator*(float scalar, const Vec4& v) {
 	Vec4 result;
 	result.x = v.x * scalar;
 	result.y = v.y * scalar;
@@ -78,7 +78,7 @@ Vec4 operator*(float scalar, Vec4 v) {
 	return result;
 }
 
-Vec4 operator/(Vec4 v, float scalar) {
+Vec4 operator/(const Vec4& v, float scalar) {
 	Vec4 result;
 	result.x = v.x / scalar;
 	result.y = v.y / scalar;
@@ -87,7 +87,7 @@ Vec4 operator/(Vec4 v, float scalar) {
 	return result;
 }
 
-Vec4 operator+(Vec4 v1, Vec4 v2) {
+Vec4 operator+(const Vec4& v1, const Vec4& v2) {
 	Vec4 result;
 	result.x = v1.x + v2.x;
 	result.y = v1.y + v2.y;
@@ -96,7 +96,7 @@ Vec4 operator+(Vec4 v1, Vec4 v2) {
 	return result;
 }
 
-Vec4 operator-(Vec4 v1, Vec4 v2) {
+Vec4 operator-(const Vec4& v1, const Vec4& v2) {
 	Vec4 result;
 	result.x = v1.x - v2.x;
 	result.y = v1.y - v2.y;

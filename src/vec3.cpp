@@ -22,21 +22,21 @@ Vec3::Vec3(const Vec3& other) {
 	z = other.z;
 }
 
-Vec3& Vec3::operator+=(Vec3 other){
+Vec3& Vec3::operator+=(const Vec3& other){
 	x += other.x;
 	y += other.y;
 	z += other.z;
 	return *this;
 }
 
-Vec3& Vec3::operator-=(Vec3 other) {
+Vec3& Vec3::operator-=(const Vec3& other) {
 	x -= other.x;
 	y -= other.y;
 	z -= other.z;
 	return *this;
 }
 
-Vec3& Vec3::operator*=(Vec3 other) {
+Vec3& Vec3::operator*=(const Vec3& other) {
 	x *= other.x;
 	y *= other.y;
 	z *= other.z;
@@ -65,7 +65,7 @@ Vec3& Vec3::normalize() {
 	return *this;
 }
 
-Vec3 operator+(Vec3 v1, Vec3 v2) {
+Vec3 operator+(const Vec3& v1, const Vec3& v2) {
 	Vec3 result;
 	result.x = v1.x + v2.x;
 	result.y = v1.y + v2.y;
@@ -73,7 +73,7 @@ Vec3 operator+(Vec3 v1, Vec3 v2) {
 	return result;
 }
 
-Vec3 operator-(Vec3 v1, Vec3 v2) {
+Vec3 operator-(const Vec3& v1, const Vec3& v2) {
 	Vec3 result;
 	result.x = v1.x - v2.x;
 	result.y = v1.y - v2.y;
@@ -81,7 +81,7 @@ Vec3 operator-(Vec3 v1, Vec3 v2) {
 	return result;
 }
 
-Vec3 operator*(Vec3 v1, Vec3 v2) {
+Vec3 operator*(const Vec3& v1, const Vec3& v2) {
 	Vec3 result;
 	result.x = v1.x * v2.x;
 	result.y = v1.y * v2.y;
@@ -89,7 +89,7 @@ Vec3 operator*(Vec3 v1, Vec3 v2) {
 	return result;
 }
 
-Vec3 operator*(float scalar, Vec3 v) {
+Vec3 operator*(float scalar, const Vec3& v) {
 	Vec3 result;
 	result.x = v.x * scalar;
 	result.y = v.y * scalar;
@@ -97,7 +97,7 @@ Vec3 operator*(float scalar, Vec3 v) {
 	return result;
 }
 
-Vec3 operator/(Vec3 v, float scalar) {
+Vec3 operator/(const Vec3& v, float scalar) {
 	Vec3 result;
 	result.x = v.x / scalar;
 	result.y = v.y / scalar;
@@ -135,13 +135,13 @@ float Vec3::length() const {
 	return std::sqrt(x*x + y*y + z*z);
 }
 
-float Vec3::dotProduct(Vec3 v1, Vec3 v2) {
+float Vec3::dotProduct(const Vec3& v1, const Vec3& v2) {
 	return v1.x * v2.x
 		+ v1.y * v2.y
 		+ v1.z * v2.z;
 }
 
-Vec3 Vec3::crossProduct(Vec3 v1, Vec3 v2) {
+Vec3 Vec3::crossProduct(const Vec3& v1, const Vec3& v2) {
 	Vec3 result;
 	for(int i = 0; i < 3; i++) {
 		int j = (i+1)%3;
@@ -155,21 +155,21 @@ Vec3 Vec3::normalize(Vec3 v) {
 	return v.normalize();
 }
 
-Vec3 Vec3::project(Vec3 v, Vec3 onto) {
+Vec3 Vec3::project(const Vec3& v, const Vec3& onto) {
 	return Vec3::dotProduct(v, onto) / Vec3::dotProduct(onto, onto) * onto;
 }
 
-Vec3 Vec3::refract(Vec3 v, Vec3 normal, float index1, float index2) {
+Vec3 Vec3::refract(const Vec3& v, const Vec3& normal, float index1, float index2) {
 	Vec3 proj = Vec3::project(v, normal);
 	Vec3 ortho = v - proj;
 	return Vec3::normalize(proj + (index1 / index2) * ortho);
 }
 
-float Vec3::angleBetween(Vec3 v1, Vec3 v2) {
+float Vec3::angleBetween(const Vec3& v1, const Vec3& v2) {
 	return std::acos(Vec3::dotProduct(v1, v2) / (v1.length() * v2.length()));
 }
 
-std::ostream& operator<<(std::ostream& out, Vec3 v) {
+std::ostream& operator<<(std::ostream& out, const Vec3& v) {
 	out << v.x << ' ' << v.y << ' ' << v.z;
 	return out;
 }

@@ -19,23 +19,14 @@
 #define SCREEN_HEIGHT 512
 
 Pixel pixel_buffer[SCREEN_WIDTH * SCREEN_HEIGHT];
-
 Scene scene;
 
-void renderImage() {
-	scene.render(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_buffer);
-}
-
 void clearImage() {
-	try {
-		for( int x = 0; x < SCREEN_WIDTH; x++ ) {
-			for( int y = 0; y < SCREEN_HEIGHT; y++ ) {
-				int bufferInd = y*SCREEN_WIDTH + x;
-				pixel_buffer[ bufferInd ] = Pixel(0, 0, 0);
-			}
+	for( int x = 0; x < SCREEN_WIDTH; x++ ) {
+		for( int y = 0; y < SCREEN_HEIGHT; y++ ) {
+			int rgb = ((x/8 + y/8) % 2) ? 255 : 0;
+			pixel_buffer[y*SCREEN_WIDTH + x] = Pixel(rgb, rgb, rgb);
 		}
-	} catch (...) {
-		std::cout << "Caught exception when clearing buffer\n";
 	}
 }
 
@@ -43,14 +34,7 @@ void keyboard(unsigned char key, int x, int y)  {
 	switch(key) {
 		case 'r':
 			clearImage();
-			renderImage();
-			break;
-
-		case 'm':
-			for(int i = 1; i < MaterialHandler::numMaterials(); i++) {
-				std::cout << '\n' << MaterialHandler::getMaterial(i);
-			}
-			std::cout << '\n';
+			scene.render(SCREEN_WIDTH, SCREEN_HEIGHT, pixel_buffer);
 			break;
 	}
 }

@@ -35,14 +35,15 @@ obj/material_handler.o: src/material_handler.cpp inc/material_handler.hpp inc/ma
 obj/texture_handler.o: src/texture_handler.cpp inc/texture_handler.hpp inc/texture.hpp
 	$(MAKE_OBJ)
 
-obj/material.o: src/material.cpp inc/material.hpp
+obj/material.o: src/material.cpp inc/material.hpp inc/vec3.hpp
 	$(MAKE_OBJ)
 
-obj/texture.o: src/texture.cpp inc/texture.hpp
+obj/texture.o: src/texture.cpp inc/texture.hpp inc/vec4.hpp
 	$(MAKE_OBJ)
 
-obj/scene.o: src/scene.cpp inc/scene.hpp inc/models/model.hpp inc/vec3.hpp
+obj/scene.o: src/scene.cpp inc/scene.hpp inc/models/model.hpp inc/vec3.hpp inc/vec4.hpp
 	$(MAKE_OBJ)
+
 
 obj/vec3.o: src/vec3.cpp inc/vec3.hpp
 	$(MAKE_OBJ)
@@ -55,6 +56,7 @@ obj/path.o: src/path.cpp inc/path.hpp
 
 obj/stb_image.o: src/stb_image.c inc/stb_image.h
 	$(MAKE_OBJ)
+
 
 clean:
 	$(CLEAN)
