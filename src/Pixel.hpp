@@ -10,7 +10,7 @@ public:
 	constexpr RGBPixel( uint32_t rgb )
 		: r( rgb >> 16 ), g( rgb >> 8 ), b( rgb )
 	{}
-	constexpr RGBPixel( uint8_t red, uint8_t blue, uint8_t green )
+	constexpr RGBPixel( uint8_t red, uint8_t green, uint8_t blue )
 		: r( red ), g( green ), b( blue )
 	{}
 	constexpr RGBPixel( const RGBPixel& ) = default;
@@ -31,7 +31,7 @@ class RGBAPixel
 public:
 	RGBAPixel() = default;
 	constexpr RGBAPixel( uint32_t abgr_ ) : abgr( abgr_ ) {}
-	constexpr RGBAPixel( uint8_t red, uint8_t blue, uint8_t green, uint8_t alpha = 255 )
+	constexpr RGBAPixel( uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255 )
 		: r( red ), g( green ), b( blue ), a( alpha )
 	{}
 	constexpr RGBAPixel( const RGBAPixel& other ) : abgr( other.abgr ) {}

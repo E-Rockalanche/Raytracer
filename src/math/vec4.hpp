@@ -13,12 +13,13 @@ public:
 public: // constructors
 
 	vec4() = default;
-	
+	constexpr vec4( const vec4& ) = default;
+	constexpr vec4( value_type val )
+		: x( val ), y( val ), z( val ), w( val )
+	{}
 	constexpr vec4( value_type x_, value_type y_, value_type z_, value_type w_ )
 		: x( x_ ), y( y_ ), z( z_ ), w( w_ )
 	{}
-
-	constexpr vec4( const vec4& ) = default;
 
 public: // access
 

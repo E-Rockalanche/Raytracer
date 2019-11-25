@@ -18,9 +18,9 @@ public:
 public: // construction
 
 	vec3() = default;
+	constexpr vec3( const vec3& ) = default;
 	constexpr vec3( const T& v ) : x( v ), y( v ), z( v ) {}
 	constexpr vec3( const T& x_, const T& y_, const T& z_ ) : x( x_ ), y( y_ ), z( z_ ) {}
-	constexpr vec3( const vec3& ) = default;
 
 public: // math
 

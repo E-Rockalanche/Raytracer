@@ -47,23 +47,27 @@ math::vec4 Texture::samplePixel( int x, int y ) const
 			r = g = b = p[0];
 			a = 255.0;
 			break;
+
 		case 2:
 			r = p[0];
 			g = p[1];
 			b = a = 255.0;
 			break;
+
 		case 3:
 			r = p[0];
 			g = p[1];
 			b = p[2];
 			a = 255.0;
 			break;
+
 		case 4:
 			r = p[0];
 			g = p[1];
 			b = p[2];
 			a = p[3];
 			break;
+			
 		default:
 			throw std::runtime_error( "no support for more than 4 colour channels" );
 	}
