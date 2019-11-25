@@ -168,7 +168,9 @@ public: // helper functions
 		};
 	}
 
-	T x, y, z;
+	T x;
+	T y;
+	T z;
 };
 
 } // namespace math

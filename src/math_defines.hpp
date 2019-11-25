@@ -9,7 +9,7 @@
 // using scalar_t = math::fixed_point<16, 16>;
 using scalar_t = float;
 using vector_t = math::vec3<scalar_t>;
-using colour_t = vector_t;
+using colour_t = math::vec3<float>;
 
 constexpr scalar_t PI = 3.14159265359;
 

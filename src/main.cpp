@@ -8,10 +8,10 @@
 
 #include <memory>
 
-constexpr int ScreenWidth = 480;
-constexpr int ScreenHeight = 320;
+constexpr int ScreenWidth = 512;
+constexpr int ScreenHeight = 512;
 
-RGBPixel pixel_buffer[ScreenWidth * ScreenHeight];
+RGBPixel pixel_buffer[ ScreenWidth * ScreenHeight ];
 
 Scene scene;
 
@@ -29,16 +29,22 @@ SDL_Rect crop_area = {
 	ScreenHeight
 };
 
+RGBPixel test_colours[] = {
+	0x000000,
+	0xffffff,
+	0xff0000,
+	0xffff00,
+	0x00ff00,
+	0x00ffff,
+	0x0000ff,
+	0xff00ff
+};
+size_t test_colour_index = 0;
+
 void clearImage()
 {
-	for ( int x = 0; x < ScreenWidth; x++ )
-	{
-		for ( int y = 0; y < ScreenHeight; y++ )
-		{
-			int rgb = ( ( x / 8 + y / 8 ) % 2 ) ? 255 : 0;
-			pixel_buffer[ y * ScreenWidth + x ] = RGBPixel( rgb, rgb, rgb );
-		}
-	}
+	for( size_t i = 0; i < ScreenWidth * ScreenHeight; ++i )
+		pixel_buffer[ i ] = test_colours[ test_colour_index ];
 }
 
 void handleKeyboardEvent( const SDL_KeyboardEvent& event )
@@ -51,8 +57,14 @@ void handleKeyboardEvent( const SDL_KeyboardEvent& event )
 		case SDLK_r:
 		{
 			// render
-			clearImage();
 			scene.render( ScreenWidth, ScreenHeight, pixel_buffer );
+			break;
+		}
+
+		case SDLK_c:
+		{
+			test_colour_index = ( test_colour_index + 1 ) % std::size( test_colours );
+			clearImage();
 			break;
 		}
 	}
@@ -75,6 +87,8 @@ int main( int argc, char** argv )
 			return 1;
 		}
 	}
+
+	clearImage();
 
 	MaterialManager::initialize();
 

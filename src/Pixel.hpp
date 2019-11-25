@@ -13,9 +13,6 @@ public:
 	constexpr RGBPixel( uint8_t red, uint8_t blue, uint8_t green )
 		: r( red ), g( green ), b( blue )
 	{}
-	constexpr RGBPixel( uint8_t grey )
-		: r( grey ), g( grey ), b( grey )
-	{}
 	constexpr RGBPixel( const RGBPixel& other )
 		: r( other.r ), g( other.g ), b( other.b )
 	{}
@@ -35,9 +32,6 @@ public:
 	constexpr RGBAPixel( uint32_t abgr_ ) : abgr( abgr_ ) {}
 	constexpr RGBAPixel( uint8_t red, uint8_t blue, uint8_t green, uint8_t alpha = 255 )
 		: r( red ), g( green ), b( blue ), a( alpha )
-	{}
-	constexpr RGBAPixel( uint8_t grey, uint8_t alpha = 255 )
-		: r( grey ), g( grey ), b( grey ), a( alpha )
 	{}
 	constexpr RGBAPixel( const RGBAPixel& other ) : abgr( other.abgr ) {}
 	constexpr RGBAPixel( const RGBPixel& other, uint8_t alpha = 255 )

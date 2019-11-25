@@ -88,7 +88,10 @@ public: // math
 
 public:
 
-	value_type x, y, z, w;
+	value_type x;
+	value_type y;
+	value_type z;
+	value_type w;
 };
 
 inline vec4 operator+( vec4 lhs, const vec4& rhs )
