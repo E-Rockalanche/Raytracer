@@ -1,55 +1,65 @@
-#include <iostream>
+
 #include "plane.hpp"
 #include "material_handler.hpp"
 
-Plane::Plane(Vec3 position, Vec3 w, Vec3 h, int material_handle)
-		: Model(position, material_handle), w(w), h(h) {
+#include <iostream>
+
+Plane::Plane( const vector_t& position, const vector_t& w, const vector_t& h, int material_handle )
+	: Model( position, material_handle ), w( w ), h( h )
+{
 	init();
 }
 
-void Plane::init() {
-	normal = Vec3::normalize(Vec3::crossProduct(w, h));
-	constant = Vec3::dotProduct(position, normal);
+void Plane::init()
+{
+	normal = vector_t::normalize( vector_t::cross_product( w, h ) );
+	constant = vector_t::dot_product( position, normal );
 }
 
 // static
-bool Plane::lineIntersection(Vec3 origin, Vec3 direction, Vec3 position,
-		Vec3 normal, float& t) {
+bool Plane::lineIntersection( const vector_t& origin, const vector_t& direction, const vector_t& position,
+							  const vector_t& normal, scalar_t& t )
+{
 	bool intersection = false;
-	float dir_dot = Vec3::dotProduct(direction, normal);
-	if (dir_dot != 0) {
-		t = (Vec3::dotProduct(position - origin, normal)) / dir_dot;
-		intersection = (t > 0);
+	scalar_t dir_dot = vector_t::dot_product( direction, normal );
+	if ( dir_dot != 0 )
+	{
+		t = ( vector_t::dot_product( position - origin, normal ) ) / dir_dot;
+		intersection = ( t > 0 );
 	}
 	return intersection;
 }
 
-bool Plane::lineCollision(Vec3 origin, Vec3 direction, CollisionData* collision_data) const {
+bool Plane::lineCollision( const vector_t& origin, const vector_t& direction, CollisionData* collision_data ) const
+{
 	bool collided = false;
-	float t;
-	if (Plane::lineIntersection(origin, direction, position, normal, t)) {
+	scalar_t t;
+	if ( Plane::lineIntersection( origin, direction, position, normal, t ) )
+	{
 		collided = true;
-		
-		if (collision_data) {
+
+		if ( collision_data )
+		{
 			collision_data->collision_point = origin + t * direction;
 			collision_data->normal = normal;
 			collision_data->distance = t;
 			collision_data->material_handle = material_handle;
-			collision_data->tex_x = Vec3::dotProduct(collision_data->collision_point - position, w)
-				/ Vec3::dotProduct(w, w);
-			collision_data->tex_y = Vec3::dotProduct(collision_data->collision_point - position, h)
-				/ Vec3::dotProduct(h, h);
+			collision_data->tex_x = vector_t::dot_product( collision_data->collision_point - position, w )
+									/ vector_t::dot_product( w, w );
+			collision_data->tex_y = vector_t::dot_product( collision_data->collision_point - position, h )
+									/ vector_t::dot_product( h, h );
 		}
 	}
-	
+
 	return collided;
 }
 
-std::istream& operator>>(std::istream& in, Plane& plane) {
+std::istream& operator>>( std::istream& in, Plane& plane )
+{
 	std::string material_name;
-	Vec3 pos, w, h;
+	vector_t pos, w, h;
 	in >> pos >> w >> h >> material_name;
-	int handle = MaterialHandler::getHandle(material_name);
-	plane = Plane(pos, w, h, handle);
+	int handle = MaterialManager::getHandle( material_name );
+	plane = Plane( pos, w, h, handle );
 	return in;
 }
