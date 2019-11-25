@@ -3,7 +3,7 @@
 
 #include "math_defines.hpp"
 
-// #include <iostream>
+#include <iostream>
 
 class Material
 {
@@ -41,6 +41,6 @@ public:
 	scalar_t refraction_index = 1.0f;
 };
 
-// std::ostream& operator<<( std::ostream& out, const Material& material );
+std::ostream& operator<<( std::ostream& out, const Material& material );
 
 #endif

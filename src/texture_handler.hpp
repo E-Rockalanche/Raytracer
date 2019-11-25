@@ -13,7 +13,7 @@ class TextureHandler
 public:
 	static int loadTextureFile( const fs::path& filename );
 	static int getHandle( const std::string& texture_name );
-	static Texture& getTexture( int index );
+	static const Texture& getTexture( int index );
 	static int numTextures();
 	static void clear();
 private:

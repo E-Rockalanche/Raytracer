@@ -14,25 +14,24 @@ std::vector<Texture> TextureHandler::textures;
 
 int TextureHandler::loadTextureFile( const fs::path& filename )
 {
-	auto filename_str = filename.string();
+	auto filename_str = filename.filename().string();
 
 	int handle = getHandle( filename_str );
-	if ( handle == -1 )
+	if ( handle != -1 )
+		return handle;
+	
+	int width, height, channels;
+	unsigned char* data = stbi_load( filename.c_str(), &width, &height, &channels, 0 );
+	if ( data == nullptr )
 	{
-		int width, height, channels;
-		unsigned char* data = stbi_load( filename_str.c_str(), &width, &height, &channels, 0 );
-		if ( data == NULL )
-		{
-			std::cout << "cannot load " << filename << '\n';
-			handle = -1;
-		}
-		else
-		{
-			handle = textures.size();
-			name_map[ filename_str ] = handle;
-			textures.push_back( Texture( data, width, height, channels ) );
-		}
+		dbLogError( "cannot load texture %s", filename.c_str() );
+		return -1;
 	}
+
+	handle = textures.size();
+	name_map[ filename_str ] = handle;
+	textures.push_back( Texture( data, width, height, channels ) );
+	
 	return handle;
 }
 
@@ -49,7 +48,7 @@ int TextureHandler::getHandle( const std::string& texture_name )
 	}
 }
 
-Texture& TextureHandler::getTexture( int index )
+const Texture& TextureHandler::getTexture( int index )
 {
 	dbAssertMessage( index >= 0 && index < (int)textures.size(), "invalid texture handle" );
 	return textures[ index ];

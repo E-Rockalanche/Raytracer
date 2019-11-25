@@ -1,7 +1,6 @@
 
 #include "material.hpp"
 
-/*
 std::ostream& operator<<( std::ostream& out, const Material& m )
 {
 	out << "Ka "<< m.ambient << '\n';
@@ -31,4 +30,3 @@ std::ostream& operator<<( std::ostream& out, const Material& m )
 
 	return out;
 }
-*/

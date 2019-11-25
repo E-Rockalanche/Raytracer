@@ -22,10 +22,11 @@
 		dbPrintAssertion( condition );	\
 		std::printf( "\n\t" );	\
 		std::printf( __VA_ARGS__ );	\
+		std::printf( "\n" );	\
 		dbAbort();	\
 	}
 
-#define dbLog( ... ) std::printf( __VA_ARGS__ );
+#define dbLog( ... ) { std::printf( __VA_ARGS__ ); std::printf( "\n" ); }
 #define dbLogError( ... ) { std::printf( "Error: "); std::printf( __VA_ARGS__ ); dbPrintFileLine(); }
 #define dbLogWarning( ... ) { std::printf( "Warning: "); std::printf( __VA_ARGS__ ); dbPrintFileLine(); }
 

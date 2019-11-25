@@ -15,8 +15,8 @@ public:
 	static void initialize();
 	static bool loadMaterialFile( const fs::path& filename );
 	static int getHandle( std::string material_name );
-	static Material& getMaterial( int index );
-	static int numMaterials();
+	static const Material& getMaterial( int index );
+	static int numMaterials() { return (int)materials.size(); }
 
 private:
 

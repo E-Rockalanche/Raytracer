@@ -13,12 +13,13 @@ public:
 	constexpr RGBPixel( uint8_t red, uint8_t blue, uint8_t green )
 		: r( red ), g( green ), b( blue )
 	{}
-	constexpr RGBPixel( const RGBPixel& other )
-		: r( other.r ), g( other.g ), b( other.b )
-	{}
+	constexpr RGBPixel( const RGBPixel& ) = default;
 
 	uint8_t* data() { return (uint8_t*)(char*)this; }
 	const uint8_t* data() const { return (const uint8_t*)(const char*)this; }
+
+	uint8_t& operator[]( size_t index ) { return data()[ index ]; }
+	uint8_t operator[]( size_t index ) const { return data()[ index ]; }
 
 	uint8_t r;
 	uint8_t g;
@@ -40,6 +41,9 @@ public:
 
 	uint8_t* data() { return (uint8_t*)(char*)this; }
 	const uint8_t* data() const { return (const uint8_t*)(const char*)this; }
+
+	uint8_t& operator[]( size_t index ) { return data()[ index ]; }
+	uint8_t operator[]( size_t index ) const { return data()[ index ]; }
 
 	union
 	{

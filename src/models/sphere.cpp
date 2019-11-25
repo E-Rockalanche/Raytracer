@@ -80,8 +80,11 @@ std::istream& operator>>( std::istream& in, Sphere& sphere )
 	std::string material_name;
 	vector_t pos;
 	scalar_t radius;
+
 	in >> pos >> radius >> material_name;
+
 	int handle = MaterialManager::getHandle( material_name );
 	sphere = Sphere( pos, radius, handle );
+	
 	return in;
 }

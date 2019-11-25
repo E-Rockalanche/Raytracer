@@ -104,7 +104,6 @@ math::vec4 Texture::sampleColour( float x, float y, Texture::SampleMode sample_m
 
 	switch ( sample_mode )
 	{
-		default:
 		case LINEAR:
 		{
 			int xl, xr, yt, yb;
@@ -132,6 +131,7 @@ math::vec4 Texture::sampleColour( float x, float y, Texture::SampleMode sample_m
 		}
 		break;
 
+		default:
 		case NEAREST:
 		{
 			int px = clamp( ( int )( x * width ), 0, width - 1 );

@@ -41,6 +41,8 @@ RGBPixel test_colours[] = {
 };
 size_t test_colour_index = 0;
 
+size_t test_texture_index = 0;
+
 void clearImage()
 {
 	for( size_t i = 0; i < ScreenWidth * ScreenHeight; ++i )
@@ -67,11 +69,23 @@ void handleKeyboardEvent( const SDL_KeyboardEvent& event )
 			clearImage();
 			break;
 		}
+
+		case SDLK_m:
+		{
+			std::cout << "number of materials: " << MaterialManager::numMaterials() << '\n';
+			for( int i = 0; i < MaterialManager::numMaterials(); ++i )
+			{
+				std::cout << MaterialManager::getMaterial( i ) << '\n';
+			}
+			break;
+		}
 	}
 }
 
 int main( int argc, char** argv )
 {
+
+	MaterialManager::initialize();
 
 	if ( argc != 2 )
 	{
@@ -89,8 +103,6 @@ int main( int argc, char** argv )
 	}
 
 	clearImage();
-
-	MaterialManager::initialize();
 
 	dbAssert( SDL_Init( SDL_INIT_VIDEO ) >= 0 );
 

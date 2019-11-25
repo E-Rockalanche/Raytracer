@@ -20,10 +20,6 @@ public: // constructors
 
 	constexpr vec4( const vec4& ) = default;
 
-public: // assignment
-
-	vec4& operator=( const vec4& ) = default;
-
 public: // access
 
 	value_type* data()

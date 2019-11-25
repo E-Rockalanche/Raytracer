@@ -1,6 +1,7 @@
 
 #include "scene.hpp"
 
+#include "debug.hpp"
 #include "material_handler.hpp"
 #include "texture.hpp"
 #include "texture_handler.hpp"
@@ -194,12 +195,10 @@ vector_t Scene::castRay( const vector_t& origin, const vector_t& raw_direction, 
 	/*
 	find the model the collides with the ray first
 	*/
-	for ( int i = 0; i < ( int )models.size(); i++ )
+	for ( Model* cur_model : models )
 	{
 		CollisionData cur_data;
 		cur_data.distance = std::numeric_limits<scalar_t>::max();
-
-		Model* cur_model = models[i];
 
 		if ( cur_model == NULL )
 		{
@@ -235,16 +234,14 @@ vector_t Scene::castRay( const vector_t& origin, const vector_t& raw_direction, 
 	if ( material.ambient_tex_handle >= 0 )
 	{
 		const Texture& tex = TextureHandler::getTexture( material.ambient_tex_handle );
-		math::vec4 tex_colour = tex.sampleColour( collision_data.tex_x,
-											collision_data.tex_y, Texture::NEAREST );
+		math::vec4 tex_colour = tex.sampleColour( collision_data.tex_x, collision_data.tex_y, Texture::NEAREST );
 		ambient = vector_t( tex_colour.x, tex_colour.y, tex_colour.z );
 	}
 
 	if ( material.diffuse_tex_handle >= 0 )
 	{
 		const Texture& tex = TextureHandler::getTexture( material.diffuse_tex_handle );
-		math::vec4 tex_colour = tex.sampleColour( collision_data.tex_x,
-											collision_data.tex_y, Texture::NEAREST );
+		math::vec4 tex_colour = tex.sampleColour( collision_data.tex_x, collision_data.tex_y, Texture::NEAREST );
 		diffuse = vector_t( tex_colour.x, tex_colour.y, tex_colour.z );
 		alpha *= tex_colour.w;
 	}
@@ -252,8 +249,7 @@ vector_t Scene::castRay( const vector_t& origin, const vector_t& raw_direction, 
 	if ( material.specular_tex_handle >= 0 )
 	{
 		const Texture& tex = TextureHandler::getTexture( material.specular_tex_handle );
-		math::vec4 tex_colour = tex.sampleColour( collision_data.tex_x,
-											collision_data.tex_y, Texture::NEAREST );
+		math::vec4 tex_colour = tex.sampleColour( collision_data.tex_x, collision_data.tex_y, Texture::NEAREST );
 		specular = vector_t( tex_colour.x, tex_colour.y, tex_colour.z );
 	}
 
@@ -266,7 +262,7 @@ vector_t Scene::castRay( const vector_t& origin, const vector_t& raw_direction, 
 		{
 			for ( int l = 0; l < ( int )lights.size(); l++ )
 			{
-				Light* light = lights[l];
+				Light* light = lights[ l ];
 				vector_t light_colour = light->colour;
 				vector_t light_dir = light->position - collision_data.collision_point;
 				scalar_t light_distance = light_dir.length();
@@ -279,9 +275,8 @@ vector_t Scene::castRay( const vector_t& origin, const vector_t& raw_direction, 
 
 				bool can_see_light = true;
 
-				for ( int m = 0; m < ( int )models.size(); m++ )
+				for ( Model* cur_model : models )
 				{
-					Model* cur_model = models[m];
 					CollisionData light_collision;
 					bool collided = cur_model->lineCollision( collision_data.collision_point
 									+ light_dir / 1000, light_dir, &light_collision );

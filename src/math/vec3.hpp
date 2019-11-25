@@ -22,10 +22,6 @@ public: // construction
 	constexpr vec3( const T& x_, const T& y_, const T& z_ ) : x( x_ ), y( y_ ), z( z_ ) {}
 	constexpr vec3( const vec3& ) = default;
 
-public: // assignment
-
-	constexpr vec3& operator=( const vec3& ) = default;
-
 public: // math
 
 	constexpr vec3& operator+=( const vec3& other )
@@ -135,11 +131,10 @@ public: // helper functions
 
 	static constexpr vec3 cross_product( const vec3& lhs, const vec3& rhs )
 	{
-		return vec3{
+		return vec3(
 			lhs.y * rhs.z - lhs.z * rhs.y,
 			lhs.z * rhs.x - lhs.x * rhs.z,
-			lhs.x * rhs.y - lhs.y * rhs.x
-		};
+			lhs.x * rhs.y - lhs.y * rhs.x );
 	}
 
 	static constexpr vec3 project( const vec3& v, const vec3& onto )
@@ -161,11 +156,7 @@ public: // helper functions
 
 	static vec3 multiply( const vec3& lhs, const vec3& rhs )
 	{
-		return {
-			lhs.x * rhs.x,
-			lhs.y * rhs.y,
-			lhs.z * rhs.z
-		};
+		return vec3( lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z );
 	}
 
 	T x;
