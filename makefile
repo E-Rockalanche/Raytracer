@@ -1,60 +1,48 @@
 TARGET := assignment2
-CLEAN := rm ./obj/*.o ./obj/models/*.o $(TARGET)
 CXX := g++
 
-CFLAGS_NIX := -c -Wall -Wextra -std=c++11 -I./inc
-CFLAGS_WIN := -c -Wall -Wextra -std=c++11 -I".\inc" -I"C:\MinGW\freeglut\include"
+SDL_LFLAGS := -Wl,-Bdynamic -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -Wl,-Bstatic
+LFLAGS := -std=c++17 -O3 -lmingw32 -lm -mwindows -mconsole $(SDL_LFLAGS)
+CLEAN := del .\obj\*.o .\obj\models\*.o $(TARGET)
 
-LFLAGS_NIX := -lm -lGL -lGLU -lglut
-LFLAGS_WIN := -lm -L"C:\MinGW\freeglut\lib" -lfreeglut -lopengl32 -lglu32 -Wl,--subsystem,windows
+CFLAGS := -c -O3 -Wall -Wextra -std=c++17 -I./src -I./src/models -I./lib
 
 MODELS_SRC = $(wildcard ./src/models/*.cpp)
 MODELS_OBJ = $(patsubst ./src/models/%.cpp, ./obj/models/%.o, $(MODELS_SRC))
 
-MAKE_OBJ = $(CXX) $(CFLAGS_NIX) $< -o $@
-MAKE_EXE = $(CXX) $(LFLAGS_NIX) $^ -o $@
+MAKE_OBJ = $(CXX) $< -o $@ $(CFLAGS)
+MAKE_EXE = $(CXX) $^ -o $@ $(LFLAGS)
 
-$(TARGET): obj/main.o obj/scene.o obj/vec3.o obj/vec4.o obj/material.o obj/material_handler.o \
-		obj/path.o obj/texture.o obj/texture_handler.o obj/stb_image.o $(MODELS_OBJ)
+$(TARGET): obj/main.o obj/scene.o obj/material.o obj/material_handler.o \
+		obj/texture.o obj/texture_handler.o obj/stb_image.o $(MODELS_OBJ)
 	$(MAKE_EXE)
 
 models: $(MODELS_OBJ)
 
-obj/models/%.o: src/models/%.cpp inc/vec3.hpp inc/models.hpp
+obj/models/%.o: src/models/%.cpp src/models/%.hpp src/math/vec3.hpp
 	$(MAKE_OBJ)
 
-obj/main.o: src/main.cpp inc/models.hpp inc/scene.hpp
+obj/main.o: src/main.cpp src/models/model.hpp src/scene.hpp
 	$(MAKE_OBJ)
 
-obj/test.o: src/test.cpp inc/models.hpp inc/scene.hpp
+obj/material_handler.o: src/material_handler.cpp src/material_handler.hpp src/material.hpp
 	$(MAKE_OBJ)
 
-obj/material_handler.o: src/material_handler.cpp inc/material_handler.hpp inc/material.hpp
+obj/texture_handler.o: src/texture_handler.cpp src/texture_handler.hpp src/texture.hpp
 	$(MAKE_OBJ)
 
-obj/texture_handler.o: src/texture_handler.cpp inc/texture_handler.hpp inc/texture.hpp
+obj/material.o: src/material.cpp src/material.hpp src/math/vec3.hpp
 	$(MAKE_OBJ)
 
-obj/material.o: src/material.cpp inc/material.hpp
+obj/texture.o: src/texture.cpp src/texture.hpp src/math/vec4.hpp
 	$(MAKE_OBJ)
 
-obj/texture.o: src/texture.cpp inc/texture.hpp
+obj/scene.o: src/scene.cpp src/scene.hpp src/models/model.hpp src/math/vec3.hpp src/math/vec4.hpp
 	$(MAKE_OBJ)
 
-obj/scene.o: src/scene.cpp inc/scene.hpp inc/models.hpp inc/vec3.hpp
+obj/stb_image.o: src/stb_image.c src/stb_image.h
 	$(MAKE_OBJ)
 
-obj/vec3.o: src/vec3.cpp inc/vec3.hpp
-	$(MAKE_OBJ)
-
-obj/vec4.o: src/vec4.cpp inc/vec4.hpp
-	$(MAKE_OBJ)
-
-obj/path.o: src/path.cpp inc/path.hpp
-	$(MAKE_OBJ)
-
-obj/stb_image.o: src/stb_image.c inc/stb_image.h
-	$(MAKE_OBJ)
 
 clean:
 	$(CLEAN)
