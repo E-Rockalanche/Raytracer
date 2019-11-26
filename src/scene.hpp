@@ -18,6 +18,7 @@ public:
 	void addLight( Light* light );
 	bool loadScene( const fs::path& filename );
 	void render( int width, int height, RGBPixel* buffer );
+	void renderArea( int width, int height, RGBPixel* buffer, int xpos, int ypos, int areaWidth, int areaHeight );
 	void renderPixel( int width, int height, RGBPixel* buffer, int x, int y );
 
 	vector_t camera_position{ 0, 0, 0 };

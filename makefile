@@ -5,7 +5,7 @@ SDL_LFLAGS := -Wl,-Bdynamic -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -Wl,-Bstat
 LFLAGS := -std=c++17 -O3 -lmingw32 -lm -mwindows -mconsole $(SDL_LFLAGS)
 CLEAN := del .\obj\*.o .\obj\models\*.o $(TARGET)
 
-CFLAGS := -c -O3 -Wall -Wextra -std=c++17 -I./src -I./src/models
+CFLAGS := -c -O3 -Wall -Wextra -std=c++17 -I./src -I./src/models -I./lib
 
 MODELS_SRC = $(wildcard ./src/models/*.cpp)
 MODELS_OBJ = $(patsubst ./src/models/%.cpp, ./obj/models/%.o, $(MODELS_SRC))

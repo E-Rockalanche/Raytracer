@@ -14,6 +14,12 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+// #include <thread>
+#include <vector>
+
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#include "mingw-std-threads/mingw.thread.h"
 
 void Scene::addModel( Model* model )
 {
@@ -138,17 +144,48 @@ bool Scene::loadScene( const fs::path& filename )
 
 void Scene::render( int width, int height, RGBPixel* buffer )
 {
-	std::cout << "rendering\n";
+	std::cout << "Rendering\n";
+	auto now = std::time( nullptr );
 
-	for ( int y = 0; y < height; y++ )
+	constexpr int AreaSize = 128;
+
+	auto callable = [=]( int width, int height, RGBPixel* buffer, int xpos, int ypos, int areaWidth, int areaHeight )
 	{
-		for ( int x = 0; x < width; x++ )
+		this->renderArea( width, height, buffer, xpos, ypos, areaWidth, areaHeight );
+	};
+
+	std::vector<std::thread> threads;
+
+	for ( int y = 0; y < height / AreaSize; y++ )
+	{
+		for ( int x = 0; x < width / AreaSize; x++ )
 		{
-			renderPixel( width, height, buffer, x, y );
+			auto& thread = threads.emplace_back( callable, width, height, buffer, x*AreaSize, y*AreaSize, AreaSize, AreaSize );
+			std::cout << "started thread " << thread.get_id() << '\n';
 		}
 	}
 
-	std::cout << "finished\n";
+	for( auto& thread : threads )
+	{
+		auto id = thread.get_id();
+		thread.join();
+		std::cout << "thread " << id << " joined\n";
+	}
+
+	auto duration = std::time( nullptr ) - now;
+
+	std::cout << "Finished. Took " << duration << " seconds\n";
+}
+
+void Scene::renderArea( int width, int height, RGBPixel* buffer, int xpos, int ypos, int areaWidth, int areaHeight )
+{
+	for( int y = 0; y < areaHeight; ++y )
+	{
+		for( int x = 0; x < areaWidth; ++x )
+		{
+			renderPixel( width, height, buffer, x + xpos, y + ypos );
+		}
+	}
 }
 
 void Scene::renderPixel( int width, int height, RGBPixel* buffer, int xpos, int ypos )
